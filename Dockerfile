@@ -1,0 +1,46 @@
+# syntax=docker/dockerfile:1.7
+# ---- Build Stage ----
+FROM node:22-alpine AS builder
+RUN apk add --no-cache openssl
+RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
+WORKDIR /app
+# .dockerignore keeps host artifacts like node_modules and dist out of this copy.
+COPY . .
+RUN --mount=type=cache,id=backgen-pnpm-store,target=/pnpm/store \
+    sh -ceu 'if [ -f pnpm-lock.yaml ]; then \
+      pnpm install --frozen-lockfile --prefer-offline --side-effects-cache --store-dir=/pnpm/store; \
+    else \
+      pnpm install --no-frozen-lockfile --prefer-offline --side-effects-cache --store-dir=/pnpm/store; \
+    fi'
+RUN pnpm exec prisma generate
+RUN pnpm run build
+RUN test -f openapi.json || echo '{}' > openapi.json
+
+# ---- Production Stage ----
+FROM node:22-alpine AS runner
+RUN apk add --no-cache openssl
+RUN npm install -g pnpm@10.27.0
+WORKDIR /app
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 appuser
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/openapi.json ./openapi.json
+COPY --from=builder /app/prisma.config.ts ./
+COPY --from=builder /app/docker-entrypoint.sh ./docker-entrypoint.sh
+
+RUN chmod +x /app/docker-entrypoint.sh
+
+# 
+# 
+USER appuser
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:3000/health || exit 1
+
+CMD ["./docker-entrypoint.sh"]

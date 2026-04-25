@@ -1,0 +1,443 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  AVAILABLE
+}
+
+enum UnitType {
+  RESIDENTIAL
+  COMMERCIAL
+}
+
+enum UnitAvailability {
+  AVAILABLE
+  RESERVED
+  SOLD
+  UNAVAILABLE
+}
+
+enum GalleryItemType {
+  UNIT
+  FINISH
+  FURNITURE
+}
+
+enum FinishType {
+  INSIDE
+  OUTSIDE
+}
+
+enum FavoriteType {
+  GALLERY_ITEM
+  UNIT
+  FINISH
+  FURNITURE
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  WOW
+}
+
+enum WhatsappModule {
+  GALLERY
+  UNIT
+  FINISH
+  FURNITURE
+  BOOKING
+  SELL_UNIT
+  ORDER_UNIT
+  SPECIAL_FURNITURE
+}
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  password String
+
+  phone      String?
+  address    String?
+  rate       Float    @default(0)
+  role       Role     @default(USER)
+  isVerified Boolean  @default(false)
+
+  comments                 Comment[]
+  reactions                Reaction[]
+  favorites                Favorite[]
+  bookings                 BookingRequest[]
+  sellUnitRequests          SellUnitRequest[]
+  unitOrderRequests         UnitOrderRequest[]
+  finishRequests            FinishRequest[]
+  furnitureBookings         FurnitureBooking[]
+  specialFurnitureRequests  SpecialFurnitureRequest[]
+  whatsappOpenEvents        WhatsappOpenEvent[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model OtpToken {
+  id String @id @default(cuid())
+
+  email     String
+  code      String
+  consumed  Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+model PasswordResetToken {
+  id String @id @default(cuid())
+
+  email     String
+  token     String   @unique
+  consumed  Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+model GalleryItem {
+  id String @id @default(cuid())
+  title String
+  description String
+  details String?
+  keywords String?
+
+  type GalleryItemType
+
+  imageUrls String[] @default([])
+  videoUrls String[] @default([])
+
+  comments  Comment[]
+  reactions Reaction[]
+  favorites Favorite[]
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([createdAt])
+}
+model Comment {
+  id String @id @default(cuid())
+
+  body String
+
+  galleryItemId String
+  galleryItem GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([galleryItemId])
+  @@index([userId])
+}
+model Reaction {
+  id String @id @default(cuid())
+
+  type ReactionType @default(LIKE)
+
+  galleryItemId String
+  galleryItem GalleryItem @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([galleryItemId, userId])
+  @@index([userId])
+}
+model Location {
+  id String @id @default(cuid())
+  address String
+
+  latitude  Float?
+  longitude Float?
+
+  units Unit[]
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Unit {
+  id String @id @default(cuid())
+  title String
+  description String
+  keywords String?
+
+  price        Decimal
+  availability UnitAvailability @default(AVAILABLE)
+  type         UnitType
+
+  imageUrls String[] @default([])
+  videoUrls String[] @default([])
+
+  locationId String
+  location Location @relation(fields: [locationId], references: [id])
+
+  bookings  BookingRequest[]
+  favorites Favorite[]
+
+  acceptedSellRequestId String?          @unique
+  acceptedSellRequest   SellUnitRequest? @relation("AcceptedSellUnit", fields: [acceptedSellRequestId], references: [id])
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([price])
+  @@index([availability])
+  @@index([type])
+  @@index([locationId])
+  @@index([createdAt])
+}
+model BookingRequest {
+  id String @id @default(cuid())
+
+  unitId String
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name    String?
+  phone   String?
+  address String?
+  details String?
+
+  status    RequestStatus @default(PENDING)
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([unitId])
+  @@index([userId])
+  @@index([status])
+}
+model SellUnitRequest {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String
+  description String
+
+  price Decimal
+  type  UnitType
+  address String
+
+  locationId String?
+  details    String?
+
+  imageUrls String[] @default([])
+  videoUrls String[] @default([])
+
+  status    RequestStatus @default(PENDING)
+  adminNote String?
+
+  acceptedUnit Unit? @relation("AcceptedSellUnit")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([price])
+  @@index([createdAt])
+}
+model UnitOrderRequest {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String?
+  description String?
+
+  minPrice Decimal?
+  maxPrice Decimal?
+  type     UnitType?
+  address String?
+  location String?
+
+  details String?
+
+  status    RequestStatus @default(PENDING)
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+model Finish {
+  id String @id @default(cuid())
+  title String
+  description String
+
+  price Decimal
+  type  FinishType
+  subType String
+
+  imageUrls String[] @default([])
+  videoUrls String[] @default([])
+
+  requests  FinishRequest[]
+  favorites Favorite[]
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([subType])
+  @@index([price])
+  @@index([createdAt])
+}
+model FinishRequest {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  finishId String?
+  finish Finish? @relation(fields: [finishId], references: [id], onDelete: SetNull)
+
+  address     String
+  requestedAt DateTime
+  finishTypes String[]
+  details     String?
+
+  status    RequestStatus @default(PENDING)
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([finishId])
+  @@index([status])
+  @@index([requestedAt])
+}
+model FurnitureItem {
+  id String @id @default(cuid())
+  title String
+  description String
+
+  price Decimal
+
+  imageUrls String[] @default([])
+  videoUrls String[] @default([])
+
+  bookings  FurnitureBooking[]
+  favorites Favorite[]
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([price])
+  @@index([createdAt])
+}
+model FurnitureBooking {
+  id String @id @default(cuid())
+
+  furnitureItemId String
+  furnitureItem FurnitureItem @relation(fields: [furnitureItemId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name    String
+  phone   String
+  address String
+  details String?
+
+  status    RequestStatus @default(PENDING)
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([furnitureItemId])
+  @@index([userId])
+  @@index([status])
+}
+model SpecialFurnitureRequest {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name    String
+  phone   String
+  details String
+
+  status    RequestStatus @default(PENDING)
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+model Favorite {
+  id String @id @default(cuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type FavoriteType
+
+  galleryItemId String?
+  galleryItem   GalleryItem? @relation(fields: [galleryItemId], references: [id], onDelete: Cascade)
+
+  unitId String?
+  unit   Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  finishId String?
+  finish   Finish? @relation(fields: [finishId], references: [id], onDelete: Cascade)
+
+  furnitureItemId String?
+  furnitureItem   FurnitureItem? @relation(fields: [furnitureItemId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, galleryItemId])
+  @@unique([userId, unitId])
+  @@unique([userId, finishId])
+  @@unique([userId, furnitureItemId])
+  @@index([userId])
+  @@index([type])
+}
+model WhatsappOpenEvent {
+  id String @id @default(cuid())
+
+  userId String?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  module         WhatsappModule
+  targetId       String?
+  defaultMessage String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([module])
+  @@index([createdAt])
+}

@@ -1,0 +1,171 @@
+/**
+ * Query Builder
+ * Converts URL query parameters into Prisma findMany arguments.
+ *
+ * Supports: pagination, sorting, filtering, search, and relation includes.
+ *
+ * Examples:
+ *   ?page=2&limit=20
+ *   ?sort=createdAt&order=desc
+ *   ?filter[status]=PUBLISHED&filter[authorId]=abc123
+ *   ?search=hello
+ *   ?include=author,comments
+ */
+import { ProblemDetail } from '../middlewares/error.middleware.js';
+
+export type FilterFieldType = 'string' | 'enum' | 'number' | 'bigint' | 'boolean' | 'datetime' | 'other';
+
+export interface QueryBuilderConfig {
+  allowedFilterFields?: string[];
+  searchableFields?: string[];
+  allowedIncludeRelations?: string[];
+  filterFieldTypes?: Record<string, FilterFieldType>;
+  defaultSortField?: string;
+}
+
+export interface QueryOptions {
+  where?: Record<string, any>;
+  orderBy?: Record<string, string>;
+  skip?: number;
+  take: number;
+  include?: Record<string, boolean>;
+  page: number;
+}
+
+function filterValueError(field: string, expected: string): ProblemDetail {
+  return new ProblemDetail({
+    type: 'validation-error',
+    title: 'Validation Error',
+    status: 422,
+    detail: `Invalid filter value for "${field}". Expected ${expected}.`,
+  });
+}
+
+function parseFilterValue(field: string, rawValue: unknown, fieldType: FilterFieldType): unknown {
+  if (typeof rawValue !== 'string') {
+    throw filterValueError(field, 'a string literal');
+  }
+
+  if (fieldType === 'number') {
+    const num = Number(rawValue);
+    if (!Number.isFinite(num)) {
+      throw filterValueError(field, 'a numeric value');
+    }
+    return num;
+  }
+
+  if (fieldType === 'bigint') {
+    try {
+      return BigInt(rawValue);
+    } catch {
+      throw filterValueError(field, 'an integer value');
+    }
+  }
+
+  if (fieldType === 'boolean') {
+    if (rawValue === 'true') return true;
+    if (rawValue === 'false') return false;
+    throw filterValueError(field, 'true or false');
+  }
+
+  if (fieldType === 'datetime') {
+    const date = new Date(rawValue);
+    if (Number.isNaN(date.getTime())) {
+      throw filterValueError(field, 'an ISO datetime value');
+    }
+    return date;
+  }
+
+  if (fieldType === 'enum') {
+    return rawValue;
+  }
+
+  if (fieldType === 'string') {
+
+    return { contains: rawValue, mode: 'insensitive' as const };
+
+  }
+
+  return rawValue;
+}
+
+export function buildQueryOptions(
+  query: Record<string, any>,
+  config: QueryBuilderConfig = {},
+): QueryOptions {
+  const {
+    allowedFilterFields = [],
+    searchableFields = [],
+    allowedIncludeRelations = [],
+    filterFieldTypes = {},
+    defaultSortField,
+  } = config;
+
+  const pageRaw = parseInt(String(query.page ?? '1'), 10);
+  const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
+  const limitRaw = parseInt(String(query.limit ?? '20'), 10);
+  const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(100, limitRaw) : 20;
+  const skip = (page - 1) * limit;
+
+  // Sorting — validate sort field against allowed fields; use model fallback when provided.
+  const requestedSort = typeof query.sort === 'string' ? query.sort : undefined;
+  let sortField: string | undefined;
+  if (requestedSort && allowedFilterFields.includes(requestedSort)) {
+    sortField = requestedSort;
+  } else if (defaultSortField && allowedFilterFields.includes(defaultSortField)) {
+    sortField = defaultSortField;
+  }
+  const order = query.order === 'asc' ? 'asc' : 'desc';
+  const orderBy = sortField ? { [sortField]: order } : undefined;
+
+  // Filtering — only allow known fields, parse by field type
+  const where: Record<string, any> = {};
+  if (query.filter && typeof query.filter === 'object' && !Array.isArray(query.filter)) {
+    for (const [key, value] of Object.entries(query.filter)) {
+      if (allowedFilterFields.length > 0 && !allowedFilterFields.includes(key)) {
+        continue;
+      }
+      const fieldType = filterFieldTypes[key] ?? 'string';
+      where[key] = parseFilterValue(key, value, fieldType);
+    }
+  }
+
+  // Full-text search across searchable fields
+  if (query.search && typeof query.search === 'string' && searchableFields.length > 0) {
+    const searchTerm = query.search;
+    const searchConditions = searchableFields.map((field) => ({
+
+      [field]: { contains: searchTerm, mode: 'insensitive' as const },
+
+    }));
+    where.OR = searchConditions;
+  }
+
+  // Includes
+  let include: Record<string, boolean> | undefined;
+  if (query.include !== undefined) {
+    const relations = String(query.include)
+      .split(',')
+      .map((r: string) => r.trim())
+      .filter(Boolean);
+    const invalidRelations = relations.filter(
+      (relation) => !allowedIncludeRelations.includes(relation)
+    );
+    if (invalidRelations.length > 0) {
+      throw new ProblemDetail({
+        type: 'validation-error',
+        title: 'Validation Error',
+        status: 422,
+        detail: `Unknown include relation(s): ${invalidRelations.join(', ')}`,
+      });
+    }
+    if (relations.length > 0) {
+      include = {};
+      for (const relation of relations) {
+        include[relation] = true;
+      }
+    }
+  }
+
+  return { where, orderBy, skip, take: limit, include, page };
+}

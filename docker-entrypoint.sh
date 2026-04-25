@@ -1,0 +1,42 @@
+#!/bin/sh
+set -eu
+
+has_prisma_migrations() {
+  if [ ! -d "prisma/migrations" ]; then
+    return 1
+  fi
+
+  for path in prisma/migrations/*; do
+    if [ -d "$path" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+run_bootstrap_command() {
+  description="$1"
+  shift
+
+  echo "$description"
+  if "$@"; then
+    return 0
+  fi
+
+  status=$?
+  echo "Database bootstrap failed (exit $status): $*"
+  return "$status"
+}
+
+bootstrap_schema() {
+  if has_prisma_migrations; then
+    run_bootstrap_command "Bootstrapping database schema with prisma migrate deploy..." npx prisma migrate deploy
+  else
+    run_bootstrap_command "No Prisma migrations detected; bootstrapping schema with prisma db push..." npx prisma db push
+  fi
+}
+
+bootstrap_schema
+
+exec node dist/server.js

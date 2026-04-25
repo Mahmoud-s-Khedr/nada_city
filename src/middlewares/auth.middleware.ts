@@ -1,0 +1,76 @@
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env.js';
+import { ProblemDetail } from './error.middleware.js';
+import { normalizeRole } from '../utils/auth.js';
+
+// Extend Express Request to include user info
+declare global {
+  namespace Express {
+    interface Request {
+      user?: jwt.JwtPayload;
+    }
+  }
+}
+
+/**
+ * JWT Authentication Middleware
+ * Verifies Bearer token and attaches decoded user to request.
+ */
+export function authenticate(req: Request, _res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next(new ProblemDetail({
+      type: 'unauthorized',
+      title: 'Unauthorized',
+      status: 401,
+      detail: 'Missing or invalid Authorization header. Expected: Bearer <token>',
+    }));
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET) as jwt.JwtPayload;
+    req.user = decoded;
+    next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return next(new ProblemDetail({
+        type: 'token-expired',
+        title: 'Token Expired',
+        status: 401,
+        detail: 'The authentication token has expired.',
+      }));
+    }
+    return next(new ProblemDetail({
+      type: 'invalid-token',
+      title: 'Invalid Token',
+      status: 401,
+      detail: 'The authentication token is invalid.',
+    }));
+  }
+}
+
+/**
+ * Role-Based Authorization Middleware
+ * Checks that the authenticated user has one of the allowed roles.
+ * Must be used after authenticate().
+ */
+export function authorize(...allowedRoles: string[]) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const userRole = normalizeRole(req.user?.role as string | undefined);
+    const normalizedAllowedRoles = allowedRoles.map((role) => normalizeRole(role) ?? role);
+    if (!userRole || !normalizedAllowedRoles.includes(userRole)) {
+      return next(new ProblemDetail({
+        type: 'forbidden',
+        title: 'Forbidden',
+        status: 403,
+        detail: `Role '${userRole ?? 'none'}' is not authorized. Required: ${normalizedAllowedRoles.join(', ')}.`,
+        instance: req.originalUrl,
+      }));
+    }
+    next();
+  };
+}

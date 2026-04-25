@@ -1,0 +1,54 @@
+async function main() {
+  const { env } = await import('./config/env.js');
+  const [{ app }, { prisma }, { logger }] = await Promise.all([
+    import('./app.js'),
+    import('./config/database.js'),
+    import('./config/logger.js'),
+  ]);
+  const { redisConnect, redis } = await import('./config/redis.js');
+  const PORT = env.PORT;
+
+  // Verify database connection
+  await prisma.$connect();
+  logger.info('Database connected');
+  await redisConnect();
+  logger.info('Redis connected');
+
+  const server = app.listen(PORT, () => {
+    logger.info({ port: PORT }, 'Server started');
+    logger.info(`API docs: http://localhost:${PORT}/api/v1/docs`);
+  });
+
+  // Graceful shutdown
+  const shutdown = async (signal: string) => {
+    logger.info({ signal }, 'Shutting down gracefully...');
+    server.close(async () => {
+      await redis.quit();
+      logger.info('Redis disconnected');
+      await prisma.$disconnect();
+      logger.info('Database disconnected');
+      process.exit(0);
+    });
+
+    // Force exit after timeout (configurable via SHUTDOWN_TIMEOUT env var)
+    const timeout = parseInt(process.env.SHUTDOWN_TIMEOUT || '30000', 10);
+    setTimeout(() => {
+      logger.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, timeout);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+main().catch(async (error) => {
+  try {
+    const { logger } = await import('./config/logger.js');
+    logger.fatal({ error }, 'Failed to start server');
+  } catch {
+    console.error('Failed to start server');
+    console.error(error);
+  }
+  process.exit(1);
+});

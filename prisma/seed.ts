@@ -1,0 +1,1570 @@
+import 'dotenv/config';
+import bcrypt from 'bcryptjs';
+import { faker } from '@faker-js/faker';
+
+const SOURCE_DATABASE_MODULE = '../src/config/database.ts';
+const DIST_DATABASE_MODULE = '../dist/config/database.js';
+
+type SeedPrismaClient = Record<string, unknown> & {
+  $disconnect(): Promise<void>;
+};
+
+function isMissingSourceDatabaseModule(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const moduleError = error as NodeJS.ErrnoException & { url?: string };
+  return moduleError.code === 'ERR_MODULE_NOT_FOUND'
+    && (
+      moduleError.url?.endsWith('/src/config/database.ts')
+      || moduleError.message.includes('/src/config/database.ts')
+      || moduleError.message.includes(SOURCE_DATABASE_MODULE)
+    );
+}
+
+async function loadPrisma(): Promise<SeedPrismaClient> {
+  try {
+    const module = await import(SOURCE_DATABASE_MODULE);
+    return module.prisma as SeedPrismaClient;
+  } catch (error) {
+    if (!isMissingSourceDatabaseModule(error)) {
+      throw error;
+    }
+
+    const module = await import(DIST_DATABASE_MODULE);
+    return module.prisma as SeedPrismaClient;
+  }
+}
+
+const prisma = await loadPrisma();
+
+const SEED_COUNT = parseInt(process.env.SEED_COUNT || '5', 10);
+const MAX_UNIQUE_RETRIES = 25;
+const AUTH_SEED_PASSWORD = 'SeedPassword123!';
+
+type ParentId = string | number | bigint | Date;
+type ParentFieldValue = ParentId | boolean | Buffer | null;
+type ParentRow = Record<string, ParentFieldValue>;
+
+type SeedRelationConfig = {
+  relationName: string;
+  targetModel: string;
+  localFields: string[];
+  referenceFields: string[];
+  cacheKey: string;
+  required: boolean;
+  omit: boolean;
+};
+
+type SeedUniqueSelectorConfig = {
+  fields: string[];
+};
+
+type SeedScalarFieldConfig = {
+  name: string;
+  type: string;
+  isOptional: boolean;
+  isUnique: boolean;
+  isAuthIdentifier: boolean;
+  isAuthPassword: boolean;
+};
+
+type SeedEnumFieldConfig = {
+  name: string;
+  values: string[];
+  isOptional: boolean;
+};
+
+type SeedAuthConfig = {
+  identifierField: string;
+  passwordField: string;
+  identifierIsEmail: boolean;
+  sampleIdentifier: string;
+};
+
+type SeedModelConfig = {
+  name: string;
+  clientKey: string;
+  seedLabel: string;
+  scalarFields: SeedScalarFieldConfig[];
+  enumFields: SeedEnumFieldConfig[];
+  relationConfigs: SeedRelationConfig[];
+  uniqueSelectors: SeedUniqueSelectorConfig[];
+  auth?: SeedAuthConfig;
+};
+
+type PrismaDelegate = {
+  deleteMany(args?: unknown): Promise<unknown>;
+  findMany(args?: { select: Record<string, true> }): Promise<ParentRow[]>;
+  create(args: { data: Record<string, unknown> }): Promise<unknown>;
+};
+
+const MODEL_CONFIGS: SeedModelConfig[] = [
+  {
+    "name": "User",
+    "clientKey": "user",
+    "seedLabel": "user",
+    "scalarFields": [
+      {
+        "name": "name",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "email",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": true,
+        "isAuthIdentifier": true,
+        "isAuthPassword": false
+      },
+      {
+        "name": "password",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": true
+      },
+      {
+        "name": "phone",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "address",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [],
+    "uniqueSelectors": [
+      {
+        "fields": [
+          "email"
+        ]
+      }
+    ],
+    "auth": {
+      "identifierField": "email",
+      "passwordField": "password",
+      "identifierIsEmail": true,
+      "sampleIdentifier": "seed-user-1@example.com"
+    }
+  },
+  {
+    "name": "OtpToken",
+    "clientKey": "otpToken",
+    "seedLabel": "otp-token",
+    "scalarFields": [
+      {
+        "name": "email",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "code",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "PasswordResetToken",
+    "clientKey": "passwordResetToken",
+    "seedLabel": "password-reset-token",
+    "scalarFields": [
+      {
+        "name": "email",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "token",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": true,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "expiresAt",
+        "type": "DateTime",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [],
+    "uniqueSelectors": [
+      {
+        "fields": [
+          "token"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "GalleryItem",
+    "clientKey": "galleryItem",
+    "seedLabel": "gallery-item",
+    "scalarFields": [
+      {
+        "name": "title",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "details",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "keywords",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "deletedAt",
+        "type": "DateTime",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [
+      {
+        "name": "type",
+        "values": [
+          "UNIT",
+          "FINISH",
+          "FURNITURE"
+        ],
+        "isOptional": false
+      }
+    ],
+    "relationConfigs": [],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "Location",
+    "clientKey": "location",
+    "seedLabel": "location",
+    "scalarFields": [
+      {
+        "name": "address",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "latitude",
+        "type": "Float",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "longitude",
+        "type": "Float",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "deletedAt",
+        "type": "DateTime",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "Finish",
+    "clientKey": "finish",
+    "seedLabel": "finish",
+    "scalarFields": [
+      {
+        "name": "title",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "price",
+        "type": "Decimal",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "subType",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "deletedAt",
+        "type": "DateTime",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [
+      {
+        "name": "type",
+        "values": [
+          "INSIDE",
+          "OUTSIDE"
+        ],
+        "isOptional": false
+      }
+    ],
+    "relationConfigs": [],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "FurnitureItem",
+    "clientKey": "furnitureItem",
+    "seedLabel": "furniture-item",
+    "scalarFields": [
+      {
+        "name": "title",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "price",
+        "type": "Decimal",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "deletedAt",
+        "type": "DateTime",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "SellUnitRequest",
+    "clientKey": "sellUnitRequest",
+    "seedLabel": "sell-unit-request",
+    "scalarFields": [
+      {
+        "name": "title",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "price",
+        "type": "Decimal",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "address",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "locationId",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "details",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "adminNote",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [
+      {
+        "name": "type",
+        "values": [
+          "RESIDENTIAL",
+          "COMMERCIAL"
+        ],
+        "isOptional": false
+      }
+    ],
+    "relationConfigs": [
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "UnitOrderRequest",
+    "clientKey": "unitOrderRequest",
+    "seedLabel": "unit-order-request",
+    "scalarFields": [
+      {
+        "name": "title",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "minPrice",
+        "type": "Decimal",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "maxPrice",
+        "type": "Decimal",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "address",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "location",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "details",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "adminNote",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [
+      {
+        "name": "type",
+        "values": [
+          "RESIDENTIAL",
+          "COMMERCIAL"
+        ],
+        "isOptional": true
+      }
+    ],
+    "relationConfigs": [
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "SpecialFurnitureRequest",
+    "clientKey": "specialFurnitureRequest",
+    "seedLabel": "special-furniture-request",
+    "scalarFields": [
+      {
+        "name": "name",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "phone",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "details",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "adminNote",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "WhatsappOpenEvent",
+    "clientKey": "whatsappOpenEvent",
+    "seedLabel": "whatsapp-open-event",
+    "scalarFields": [
+      {
+        "name": "targetId",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "defaultMessage",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [
+      {
+        "name": "module",
+        "values": [
+          "GALLERY",
+          "UNIT",
+          "FINISH",
+          "FURNITURE",
+          "BOOKING",
+          "SELL_UNIT",
+          "ORDER_UNIT",
+          "SPECIAL_FURNITURE"
+        ],
+        "isOptional": false
+      }
+    ],
+    "relationConfigs": [
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": false,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "Comment",
+    "clientKey": "comment",
+    "seedLabel": "comment",
+    "scalarFields": [
+      {
+        "name": "body",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [
+      {
+        "relationName": "galleryItem",
+        "targetModel": "GalleryItem",
+        "localFields": [
+          "galleryItemId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "GalleryItem|id",
+        "required": true,
+        "omit": false
+      },
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "Reaction",
+    "clientKey": "reaction",
+    "seedLabel": "reaction",
+    "scalarFields": [],
+    "enumFields": [],
+    "relationConfigs": [
+      {
+        "relationName": "galleryItem",
+        "targetModel": "GalleryItem",
+        "localFields": [
+          "galleryItemId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "GalleryItem|id",
+        "required": true,
+        "omit": false
+      },
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": [
+      {
+        "fields": [
+          "galleryItemId",
+          "userId"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "FinishRequest",
+    "clientKey": "finishRequest",
+    "seedLabel": "finish-request",
+    "scalarFields": [
+      {
+        "name": "address",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "requestedAt",
+        "type": "DateTime",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "details",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "adminNote",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      },
+      {
+        "relationName": "finish",
+        "targetModel": "Finish",
+        "localFields": [
+          "finishId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "Finish|id",
+        "required": false,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "FurnitureBooking",
+    "clientKey": "furnitureBooking",
+    "seedLabel": "furniture-booking",
+    "scalarFields": [
+      {
+        "name": "name",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "phone",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "address",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "details",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "adminNote",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [
+      {
+        "relationName": "furnitureItem",
+        "targetModel": "FurnitureItem",
+        "localFields": [
+          "furnitureItemId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "FurnitureItem|id",
+        "required": true,
+        "omit": false
+      },
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "Unit",
+    "clientKey": "unit",
+    "seedLabel": "unit",
+    "scalarFields": [
+      {
+        "name": "title",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "description",
+        "type": "String",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "keywords",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "price",
+        "type": "Decimal",
+        "isOptional": false,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "deletedAt",
+        "type": "DateTime",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [
+      {
+        "name": "type",
+        "values": [
+          "RESIDENTIAL",
+          "COMMERCIAL"
+        ],
+        "isOptional": false
+      }
+    ],
+    "relationConfigs": [
+      {
+        "relationName": "location",
+        "targetModel": "Location",
+        "localFields": [
+          "locationId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "Location|id",
+        "required": true,
+        "omit": false
+      },
+      {
+        "relationName": "acceptedSellRequest",
+        "targetModel": "SellUnitRequest",
+        "localFields": [
+          "acceptedSellRequestId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "SellUnitRequest|id",
+        "required": false,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": [
+      {
+        "fields": [
+          "acceptedSellRequestId"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "BookingRequest",
+    "clientKey": "bookingRequest",
+    "seedLabel": "booking-request",
+    "scalarFields": [
+      {
+        "name": "name",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "phone",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "address",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "details",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      },
+      {
+        "name": "adminNote",
+        "type": "String",
+        "isOptional": true,
+        "isUnique": false,
+        "isAuthIdentifier": false,
+        "isAuthPassword": false
+      }
+    ],
+    "enumFields": [],
+    "relationConfigs": [
+      {
+        "relationName": "unit",
+        "targetModel": "Unit",
+        "localFields": [
+          "unitId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "Unit|id",
+        "required": true,
+        "omit": false
+      },
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": []
+  },
+  {
+    "name": "Favorite",
+    "clientKey": "favorite",
+    "seedLabel": "favorite",
+    "scalarFields": [],
+    "enumFields": [
+      {
+        "name": "type",
+        "values": [
+          "GALLERY_ITEM",
+          "UNIT",
+          "FINISH",
+          "FURNITURE"
+        ],
+        "isOptional": false
+      }
+    ],
+    "relationConfigs": [
+      {
+        "relationName": "user",
+        "targetModel": "User",
+        "localFields": [
+          "userId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "User|id",
+        "required": true,
+        "omit": false
+      },
+      {
+        "relationName": "galleryItem",
+        "targetModel": "GalleryItem",
+        "localFields": [
+          "galleryItemId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "GalleryItem|id",
+        "required": false,
+        "omit": false
+      },
+      {
+        "relationName": "unit",
+        "targetModel": "Unit",
+        "localFields": [
+          "unitId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "Unit|id",
+        "required": false,
+        "omit": false
+      },
+      {
+        "relationName": "finish",
+        "targetModel": "Finish",
+        "localFields": [
+          "finishId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "Finish|id",
+        "required": false,
+        "omit": false
+      },
+      {
+        "relationName": "furnitureItem",
+        "targetModel": "FurnitureItem",
+        "localFields": [
+          "furnitureItemId"
+        ],
+        "referenceFields": [
+          "id"
+        ],
+        "cacheKey": "FurnitureItem|id",
+        "required": false,
+        "omit": false
+      }
+    ],
+    "uniqueSelectors": [
+      {
+        "fields": [
+          "userId",
+          "galleryItemId"
+        ]
+      },
+      {
+        "fields": [
+          "userId",
+          "unitId"
+        ]
+      },
+      {
+        "fields": [
+          "userId",
+          "finishId"
+        ]
+      },
+      {
+        "fields": [
+          "userId",
+          "furnitureItemId"
+        ]
+      }
+    ]
+  }
+];
+const MODEL_CONFIG_BY_NAME = new Map(MODEL_CONFIGS.map((model) => [model.name, model]));
+const UNSUPPORTED_REQUIRED_RELATIONS: string[] = [];
+let seedPhase: 'cleanup' | 'prime-parent-rows' | 'create-records' | null = null;
+let seedModelName: string | null = null;
+let seedRecordIndex: number | null = null;
+
+/**
+ * Database Seed Script
+ * Run with: pnpm run seed
+ * Configure count with: SEED_COUNT=10 pnpm run seed
+ *
+ * Seeds 18 model(s) with SEED_COUNT records each (default: 5).
+ * Explicit non-list relations are seeded in dependency order, including custom
+ * FK names and composite references. Optional cyclic/self relations are left
+ * unset, while required cyclic/self relations fail before any cleanup runs.
+ *
+ * Auth models use deterministic credentials so seeded login works immediately:
+ * password = SeedPassword123!
+ */
+
+function getDelegate(clientKey: string): PrismaDelegate {
+  const delegate = (prisma as unknown as Record<string, PrismaDelegate>)[clientKey];
+  if (!delegate) {
+    throw new Error(`Missing Prisma delegate for "${clientKey}".`);
+  }
+  return delegate;
+}
+
+function assertSupportedRelations(): void {
+  if (UNSUPPORTED_REQUIRED_RELATIONS.length === 0) {
+    return;
+  }
+
+  throw new Error(
+    `Seeder cannot safely generate required cyclic/self relations:\n- ${UNSUPPORTED_REQUIRED_RELATIONS.join('\n- ')}`
+  );
+}
+
+function formatSelector(selector: SeedUniqueSelectorConfig): string {
+  return `[${selector.fields.join(', ')}]`;
+}
+
+function serializeSignatureValue(value: unknown): string {
+  if (typeof value === 'bigint') {
+    return `bigint:${value.toString()}`;
+  }
+  if (value instanceof Date) {
+    return `date:${value.toISOString()}`;
+  }
+  if (Buffer.isBuffer(value)) {
+    return `buffer:${value.toString('base64')}`;
+  }
+  if (value === null) {
+    return 'null';
+  }
+  return `${typeof value}:${JSON.stringify(value)}`;
+}
+
+function getUniqueRegistry(): Map<string, Map<string, Set<string>>> {
+  return new Map(
+    MODEL_CONFIGS.map((model) => [
+      model.name,
+      new Map(model.uniqueSelectors.map((selector) => [selector.fields.join('|'), new Set<string>()])),
+    ])
+  );
+}
+
+function reserveUniqueCandidate(
+  model: SeedModelConfig,
+  data: Record<string, unknown>,
+  uniqueRegistry: Map<string, Set<string>>
+): string | null {
+  for (const selector of model.uniqueSelectors) {
+    if (selector.fields.some((field) => !(field in data))) {
+      continue;
+    }
+
+    const registryKey = selector.fields.join('|');
+    const seen = uniqueRegistry.get(registryKey);
+    if (!seen) {
+      continue;
+    }
+
+    const signature = selector.fields
+      .map((field) => `${field}=${serializeSignatureValue(data[field])}`)
+      .join('|');
+
+    if (seen.has(signature)) {
+      return formatSelector(selector);
+    }
+  }
+
+  for (const selector of model.uniqueSelectors) {
+    if (selector.fields.some((field) => !(field in data))) {
+      continue;
+    }
+
+    const registryKey = selector.fields.join('|');
+    const seen = uniqueRegistry.get(registryKey);
+    if (!seen) {
+      continue;
+    }
+
+    const signature = selector.fields
+      .map((field) => `${field}=${serializeSignatureValue(data[field])}`)
+      .join('|');
+    seen.add(signature);
+  }
+
+  return null;
+}
+
+async function generateScalarValue(
+  model: SeedModelConfig,
+  field: SeedScalarFieldConfig,
+  recordIndex: number
+): Promise<unknown> {
+  if (field.isAuthIdentifier && model.auth) {
+    const suffix = recordIndex + 1;
+    return model.auth.identifierIsEmail
+      ? `seed-${model.seedLabel}-${suffix}@example.com`
+      : `seed-${model.seedLabel}-${suffix}`;
+  }
+
+  if (field.isAuthPassword) {
+    return bcrypt.hash(AUTH_SEED_PASSWORD, 12);
+  }
+
+  const normalized = field.name.toLowerCase();
+
+  if (normalized === 'email' || normalized === 'emailaddress') return faker.internet.email();
+  if (normalized === 'name' || normalized === 'fullname' || normalized === 'displayname') return faker.person.fullName();
+  if (normalized === 'firstname') return faker.person.firstName();
+  if (normalized === 'lastname' || normalized === 'surname') return faker.person.lastName();
+  if (normalized === 'username' || normalized === 'handle' || normalized === 'login') return faker.internet.username();
+  if (normalized === 'password' || normalized === 'passwordhash' || normalized === 'hashedpassword') return faker.internet.password({ length: 16 });
+  if (normalized === 'phone' || normalized === 'phonenumber' || normalized === 'mobile') return faker.phone.number();
+  if (normalized === 'title') return faker.lorem.sentence({ min: 3, max: 6 });
+  if (normalized === 'slug' || normalized === 'permalink') return faker.helpers.slugify(faker.lorem.words(3));
+  if (normalized === 'content' || normalized === 'body' || normalized === 'text') return faker.lorem.paragraphs(2);
+  if (normalized === 'description' || normalized === 'excerpt' || normalized === 'summary' || normalized === 'bio' || normalized === 'about' || normalized === 'note' || normalized === 'notes') return faker.lorem.sentences(2);
+  if (normalized.includes('url') || normalized === 'website' || normalized === 'link' || normalized === 'homepage') return faker.internet.url();
+  if (normalized === 'color' || normalized === 'colour') return faker.internet.color();
+  if (normalized === 'city' || normalized === 'location') return faker.location.city();
+  if (normalized === 'address' || normalized === 'streetaddress') return faker.location.streetAddress();
+  if (normalized === 'zipcode' || normalized === 'postalcode' || normalized === 'zip') return faker.location.zipCode();
+  if (normalized === 'country') return faker.location.country();
+  if (normalized === 'price' || normalized === 'amount' || normalized === 'cost' || normalized === 'total' || normalized === 'balance') {
+    return faker.number.float({ min: 1, max: 1000, fractionDigits: 2 });
+  }
+  if (normalized === 'quantity' || normalized === 'count' || normalized === 'viewcount' || normalized === 'hits' || normalized === 'stock') {
+    return faker.number.int({ min: 0, max: 1000 });
+  }
+  if (normalized === 'rating') return faker.number.float({ min: 1, max: 5, fractionDigits: 1 });
+  if (normalized === 'score' || normalized === 'points' || normalized === 'rank') return faker.number.int({ min: 0, max: 100 });
+  if (normalized === 'age') return faker.number.int({ min: 18, max: 80 });
+
+  if (field.type === 'String') return faker.lorem.word();
+  if (field.type === 'Int') return faker.number.int({ min: 1, max: 100 });
+  if (field.type === 'Float' || field.type === 'Decimal') return faker.number.float({ min: 0, max: 100, fractionDigits: 2 });
+  if (field.type === 'Boolean') return faker.datatype.boolean();
+  if (field.type === 'DateTime') return faker.date.recent().toISOString();
+  if (field.type === 'BigInt') return BigInt(faker.number.int({ min: 1, max: 1000000 }));
+  if (field.type === 'Bytes') return Buffer.from(faker.string.alphanumeric(16));
+  return {};
+}
+
+async function primeParentRows(
+  model: SeedModelConfig,
+  parentRows: Record<string, ParentRow[]>
+): Promise<void> {
+  for (const relation of model.relationConfigs) {
+    if (relation.omit) {
+      continue;
+    }
+    if (parentRows[relation.cacheKey]) {
+      continue;
+    }
+
+    const targetModel = MODEL_CONFIG_BY_NAME.get(relation.targetModel);
+    if (!targetModel) {
+      throw new Error(`Unknown relation target "${relation.targetModel}" while seeding ${model.name}.`);
+    }
+
+    const select = Object.fromEntries(relation.referenceFields.map((field) => [field, true]));
+    parentRows[relation.cacheKey] = await getDelegate(targetModel.clientKey).findMany({ select });
+  }
+}
+
+async function buildCandidateData(
+  model: SeedModelConfig,
+  recordIndex: number,
+  parentRows: Record<string, ParentRow[]>
+): Promise<Record<string, unknown>> {
+  const data: Record<string, unknown> = {};
+
+  for (const relation of model.relationConfigs) {
+    if (relation.omit) {
+      continue;
+    }
+
+    const rows = parentRows[relation.cacheKey] ?? [];
+    if (rows.length === 0 && SEED_COUNT > 0) {
+      throw new Error(
+        `No parent rows were available for ${model.name}.${relation.relationName} (${relation.targetModel} -> ${relation.referenceFields.join(', ')}).`
+      );
+    }
+    if (rows.length === 0) {
+      continue;
+    }
+
+    const row = rows[recordIndex % rows.length];
+    relation.localFields.forEach((localField, index) => {
+      data[localField] = row[relation.referenceFields[index]];
+    });
+  }
+
+  for (const field of model.scalarFields) {
+    data[field.name] = await generateScalarValue(model, field, recordIndex);
+  }
+
+  for (const field of model.enumFields) {
+    data[field.name] = faker.helpers.arrayElement(field.values);
+  }
+
+  return data;
+}
+
+async function createRecordWithRetries(
+  model: SeedModelConfig,
+  recordIndex: number,
+  parentRows: Record<string, ParentRow[]>,
+  uniqueRegistry: Map<string, Set<string>>
+): Promise<void> {
+  const delegate = getDelegate(model.clientKey);
+  let lastCollision: string | null = null;
+
+  for (let attempt = 0; attempt < MAX_UNIQUE_RETRIES; attempt++) {
+    const data = await buildCandidateData(model, recordIndex, parentRows);
+    const collision = reserveUniqueCandidate(model, data, uniqueRegistry);
+    if (collision) {
+      lastCollision = collision;
+      continue;
+    }
+
+    await delegate.create({ data });
+    return;
+  }
+
+  throw new Error(
+    `Unable to generate unique seed data for ${model.name} after ${MAX_UNIQUE_RETRIES} attempts.` +
+    (lastCollision ? ` Conflicting selector: ${lastCollision}.` : '')
+  );
+}
+
+function logSampleAuthCredentials(model: SeedModelConfig): void {
+  if (!model.auth || SEED_COUNT <= 0) {
+    return;
+  }
+
+  console.log(
+    `Sample ${model.name} credentials -> ${model.auth.identifierField}: ${model.auth.sampleIdentifier}, password: ${AUTH_SEED_PASSWORD}`
+  );
+}
+
+async function main() {
+  assertSupportedRelations();
+  console.log(`Seeding database (${SEED_COUNT} records per model)...`);
+
+  for (const model of [...MODEL_CONFIGS].reverse()) {
+    seedPhase = 'cleanup';
+    seedModelName = model.name;
+    seedRecordIndex = null;
+    await getDelegate(model.clientKey).deleteMany();
+  }
+
+  const parentRows: Record<string, ParentRow[]> = {};
+  const uniqueRegistryByModel = getUniqueRegistry();
+
+  for (const model of MODEL_CONFIGS) {
+    seedPhase = 'prime-parent-rows';
+    seedModelName = model.name;
+    seedRecordIndex = null;
+    await primeParentRows(model, parentRows);
+
+    for (let i = 0; i < SEED_COUNT; i++) {
+      seedPhase = 'create-records';
+      seedModelName = model.name;
+      seedRecordIndex = i;
+      await createRecordWithRetries(
+        model,
+        i,
+        parentRows,
+        uniqueRegistryByModel.get(model.name) ?? new Map<string, Set<string>>()
+      );
+    }
+
+    console.log(`Seeded ${model.name}: ${SEED_COUNT} records`);
+    logSampleAuthCredentials(model);
+  }
+
+  console.log('Seeding complete.');
+}
+
+main()
+  .catch((error) => {
+    console.error('Seeding failed:', error);
+    if (seedPhase || seedModelName) {
+      const recordLabel = seedRecordIndex === null ? 'n/a' : `${seedRecordIndex + 1}/${SEED_COUNT}`;
+      console.error(`Seed context: phase=${seedPhase ?? 'unknown'}, model=${seedModelName ?? 'unknown'}, record=${recordLabel}`);
+    }
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
