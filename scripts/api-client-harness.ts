@@ -1,3 +1,6 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 type JsonObject = Record<string, unknown>;
@@ -58,8 +61,12 @@ const jsonSummary = (process.env.API_TEST_JSON_SUMMARY ?? 'false') === 'true';
 const adminEmail = process.env.API_TEST_ADMIN_EMAIL ?? process.env.ADMIN_EMAIL;
 const adminPassword = process.env.API_TEST_ADMIN_PASSWORD ?? process.env.ADMIN_PASSWORD;
 const runId = crypto.randomUUID().slice(0, 8);
+const runTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
+const logDir = process.env.API_TEST_LOG_DIR ?? 'logs';
+const logFilePath = process.env.API_TEST_LOG_FILE ?? path.join(logDir, `api-client-harness-${runTimestamp}-${runId}.log`);
 
 const results: FlowResult[] = [];
+const requestResponseLogs: string[] = [];
 
 let adminTokens: AuthTokens | null = null;
 
@@ -71,6 +78,92 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function redactValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => redactValue(item));
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => {
+        const normalizedKey = key.toLowerCase();
+        if (
+          normalizedKey.includes('password')
+          || normalizedKey.includes('token')
+          || normalizedKey === 'authorization'
+        ) {
+          return [key, '[REDACTED]'];
+        }
+        return [key, redactValue(nestedValue)];
+      })
+    );
+  }
+
+  return value;
+}
+
+function formatForLog(value: unknown): string {
+  if (value === undefined) {
+    return 'undefined';
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  return JSON.stringify(redactValue(value), null, 2);
+}
+
+function appendRequestResponseLog(entry: {
+  method: HttpMethod;
+  pathname: string;
+  query?: RequestOptions['query'];
+  body?: unknown;
+  headers: Record<string, string>;
+  status: number;
+  responseBody: string;
+}): void {
+  requestResponseLogs.push(
+    [
+      `timestamp: ${new Date().toISOString()}`,
+      `request: ${entry.method} ${entry.pathname}`,
+      `query: ${formatForLog(entry.query)}`,
+      `headers: ${formatForLog(entry.headers)}`,
+      `body: ${formatForLog(entry.body)}`,
+      `status: ${entry.status}`,
+      `response: ${entry.responseBody || '<empty>'}`,
+      '---',
+    ].join('\n')
+  );
+}
+
+async function flushLogs(): Promise<void> {
+  await mkdir(path.dirname(logFilePath), { recursive: true });
+  const summary = {
+    baseUrl,
+    runId,
+    generatedAt: new Date().toISOString(),
+    results,
+  };
+
+  const contents = [
+    '# API Client Harness Log',
+    '',
+    `log_file: ${logFilePath}`,
+    `base_url: ${baseUrl}`,
+    `run_id: ${runId}`,
+    '',
+    '## Summary',
+    formatForLog(summary),
+    '',
+    '## Requests and Responses',
+    ...requestResponseLogs,
+    '',
+  ].join('\n');
+
+  await writeFile(logFilePath, contents, 'utf8');
 }
 
 function buildUrl(pathname: string, query?: RequestOptions['query']): string {
@@ -101,6 +194,8 @@ async function request<T>(method: HttpMethod, pathname: string, options: Request
     headers.set('Authorization', `Bearer ${options.token}`);
   }
 
+  const requestHeaders = Object.fromEntries(headers.entries());
+
   const response = await fetch(buildUrl(pathname, options.query), {
     method,
     headers,
@@ -118,8 +213,27 @@ async function request<T>(method: HttpMethod, pathname: string, options: Request
   }
 
   if (options.expectedStatus !== undefined && response.status !== options.expectedStatus) {
+    appendRequestResponseLog({
+      method,
+      pathname,
+      query: options.query,
+      body: options.body,
+      headers: requestHeaders,
+      status: response.status,
+      responseBody: rawBody,
+    });
     throw new Error(`${method} ${pathname} expected ${options.expectedStatus} but received ${response.status}: ${rawBody}`);
   }
+
+  appendRequestResponseLog({
+    method,
+    pathname,
+    query: options.query,
+    body: options.body,
+    headers: requestHeaders,
+    status: response.status,
+    responseBody: rawBody,
+  });
 
   return { status: response.status, body: parsedBody, rawBody };
 }
@@ -1074,6 +1188,7 @@ function printSummary(): void {
   log(`- Base URL: ${baseUrl}`);
   log(`- Flows passed: ${passed}`);
   log(`- Flows failed: ${failed}`);
+  log(`- Log file: ${logFilePath}`);
 
   if (failed > 0) {
     for (const result of results.filter((item) => !item.passed)) {
@@ -1087,23 +1202,29 @@ function printSummary(): void {
 }
 
 async function main(): Promise<void> {
-  const session = await authAndSessionFlow();
-  const recovered = await passwordRecoveryFlow(session.email);
-  const profile = await profileFlow(session.email, recovered.password);
+  try {
+    const session = await authAndSessionFlow();
+    const recovered = await passwordRecoveryFlow(session.email);
+    const profile = await profileFlow(session.email, recovered.password);
 
-  await galleryFlow(profile.accessToken);
-  const bookingFixtures = await bookingFlow(profile.accessToken);
-  await sellUnitFlow(profile.accessToken, bookingFixtures.locationId);
-  await unitOrderFlow(profile.accessToken);
-  await finishFlow(profile.accessToken);
-  await furnitureFlow(profile.accessToken);
-  await specialFurnitureFlow(profile.accessToken);
-  await whatsappFlow(profile.accessToken, bookingFixtures.unitId);
+    await galleryFlow(profile.accessToken);
+    const bookingFixtures = await bookingFlow(profile.accessToken);
+    await sellUnitFlow(profile.accessToken, bookingFixtures.locationId);
+    await unitOrderFlow(profile.accessToken);
+    await finishFlow(profile.accessToken);
+    await furnitureFlow(profile.accessToken);
+    await specialFurnitureFlow(profile.accessToken);
+    await whatsappFlow(profile.accessToken, bookingFixtures.unitId);
 
-  printSummary();
+    await flushLogs();
+    printSummary();
 
-  if (results.some((result) => !result.passed)) {
-    process.exit(1);
+    if (results.some((result) => !result.passed)) {
+      process.exit(1);
+    }
+  } catch (error) {
+    await flushLogs();
+    throw error;
   }
 }
 
