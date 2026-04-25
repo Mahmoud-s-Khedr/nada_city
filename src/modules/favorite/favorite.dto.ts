@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { decimalNumberSchema } from '../../utils/zod-schemas.js';
 
 export const RoleSchema = z.enum(['USER', 'ADMIN']);
 export const UnitTypeSchema = z.enum(['RESIDENTIAL', 'COMMERCIAL']);
@@ -54,7 +55,7 @@ export const Favorite_UnitRelationSchema = z.object({
   title: z.string(),
   description: z.string(),
   keywords: z.string().nullish(),
-  price: z.number(),
+  price: decimalNumberSchema,
   availability: UnitAvailabilitySchema.optional(),
   type: UnitTypeSchema,
   imageUrls: z.array(z.string()).optional(),
@@ -70,7 +71,7 @@ export const Favorite_FinishRelationSchema = z.object({
   id: z.string().optional(),
   title: z.string(),
   description: z.string(),
-  price: z.number(),
+  price: decimalNumberSchema,
   type: FinishTypeSchema,
   subType: z.string(),
   imageUrls: z.array(z.string()).optional(),
@@ -84,7 +85,7 @@ export const Favorite_FurnitureItemRelationSchema = z.object({
   id: z.string().optional(),
   title: z.string(),
   description: z.string(),
-  price: z.number(),
+  price: decimalNumberSchema,
   imageUrls: z.array(z.string()).optional(),
   videoUrls: z.array(z.string()).optional(),
   deletedAt: z.coerce.date().nullish(),

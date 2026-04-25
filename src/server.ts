@@ -16,7 +16,7 @@ async function main() {
 
   const server = app.listen(PORT, () => {
     logger.info({ port: PORT }, 'Server started');
-    logger.info(`API docs: http://localhost:${PORT}/api/v1/docs`);
+    logger.info(`API docs: http://localhost:${PORT}/api/docs`);
   });
 
   // Graceful shutdown

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { decimalNumberSchema } from '../../utils/zod-schemas.js';
 
 /**
  * SellUnitRequest DTOs (Data Transfer Objects)
@@ -103,7 +104,7 @@ export const SellUnitRequest_AcceptedUnitRelationSchema = z.object({
   title: z.string(),
   description: z.string(),
   keywords: z.string().nullish(),
-  price: z.number(),
+  price: decimalNumberSchema,
   availability: UnitAvailabilitySchema.optional(),
   type: UnitTypeSchema,
   imageUrls: z.array(z.string()).optional(),
@@ -125,7 +126,7 @@ export const SellUnitRequestResponseSchema = z.object({
   userId: z.string(),
   title: z.string(),
   description: z.string(),
-  price: z.number(),
+  price: decimalNumberSchema,
   type: UnitTypeSchema,
   address: z.string(),
   locationId: z.string().nullish(),

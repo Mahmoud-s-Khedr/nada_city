@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { decimalNumberSchema } from '../../utils/zod-schemas.js';
 
 /**
  * Location DTOs (Data Transfer Objects)
@@ -40,7 +41,7 @@ export const Location_UnitsRelationSchema = z.object({
   title: z.string(),
   description: z.string(),
   keywords: z.string().nullish(),
-  price: z.number(),
+  price: decimalNumberSchema,
   availability: UnitAvailabilitySchema.optional(),
   type: UnitTypeSchema,
   imageUrls: z.array(z.string()).optional(),

@@ -21,6 +21,7 @@ function normalizeAccessTokenTtl(value: string): SignOptions['expiresIn'] {
 }
 
 const ACCESS_TOKEN_TTL = normalizeAccessTokenTtl(env.ACCESS_TOKEN_TTL ?? '15m');
+const SHOULD_EXPOSE_TEST_TOKENS = env.NODE_ENV !== 'production' && env.EXPOSE_TEST_TOKENS;
 
 const LoginSchema = z.object({
   email: z.string().email().transform((value) => value.trim().toLowerCase()),
@@ -59,6 +60,21 @@ const ResetPasswordSchema = z.object({
 
 function createOtpCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function withOptionalDevToken<T extends Record<string, unknown>>(
+  payload: T,
+  key: 'devOtpCode' | 'devResetToken',
+  value: string,
+): T & Partial<Record<'devOtpCode' | 'devResetToken', string>> {
+  if (!SHOULD_EXPOSE_TEST_TOKENS) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    [key]: value,
+  };
 }
 
 async function issueAccessAndRefreshTokens(user: { id: string; role: string; email: string }) {
@@ -111,7 +127,7 @@ router.post('/register', validate(RegisterSchema), async (req, res, next) => {
       },
     });
     await tokenDeliveryProvider.send({ email, token: code, kind: 'otp' });
-    sendSuccess(res, { userId: user.id, email, verificationRequired: true });
+    sendSuccess(res, withOptionalDevToken({ userId: user.id, email, verificationRequired: true }, 'devOtpCode', code));
   } catch (error) {
     next(error);
   }
@@ -229,6 +245,8 @@ router.post('/forgot-password', validate(ForgotPasswordSchema), async (req, res,
   try {
     const { email } = req.body as z.infer<typeof ForgotPasswordSchema>;
     const user = await prisma.user.findUnique({ where: { email } });
+    let resetTokenForResponse: string | undefined;
+
     if (user?.isVerified) {
       const token = crypto.randomUUID();
       await prisma.passwordResetToken.create({
@@ -240,8 +258,14 @@ router.post('/forgot-password', validate(ForgotPasswordSchema), async (req, res,
         },
       });
       await tokenDeliveryProvider.send({ email, token, kind: 'password-reset' });
+      resetTokenForResponse = token;
     }
-    sendSuccess(res, { requested: true });
+    sendSuccess(
+      res,
+      SHOULD_EXPOSE_TEST_TOKENS && resetTokenForResponse
+        ? withOptionalDevToken({ requested: true }, 'devResetToken', resetTokenForResponse)
+        : { requested: true }
+    );
   } catch (error) {
     next(error);
   }

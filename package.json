@@ -11,6 +11,8 @@
     "pretest": "prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:api-harness": "tsx scripts/api-client-harness.ts",
+    "report:unused-apis": "tsx scripts/generate-unused-api-report.ts",
     "migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
     "studio": "prisma studio",

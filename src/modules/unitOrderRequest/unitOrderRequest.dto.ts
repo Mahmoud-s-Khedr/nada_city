@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { decimalNumberSchema } from '../../utils/zod-schemas.js';
 
 /**
  * UnitOrderRequest DTOs (Data Transfer Objects)
@@ -104,8 +105,8 @@ export const UnitOrderRequestResponseSchema = z.object({
   userId: z.string(),
   title: z.string().nullish(),
   description: z.string().nullish(),
-  minPrice: z.number().nullish(),
-  maxPrice: z.number().nullish(),
+  minPrice: decimalNumberSchema.nullish(),
+  maxPrice: decimalNumberSchema.nullish(),
   type: UnitTypeSchema.nullish(),
   address: z.string().nullish(),
   location: z.string().nullish(),

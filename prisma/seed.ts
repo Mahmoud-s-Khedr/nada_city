@@ -42,6 +42,9 @@ const prisma = await loadPrisma();
 const SEED_COUNT = parseInt(process.env.SEED_COUNT || '5', 10);
 const MAX_UNIQUE_RETRIES = 25;
 const AUTH_SEED_PASSWORD = 'SeedPassword123!';
+const ADMIN_SEED_NAME = process.env.ADMIN_SEED_NAME || 'Seed Admin';
+const ADMIN_SEED_EMAIL = process.env.ADMIN_SEED_EMAIL || 'seed-admin@example.com';
+const ADMIN_SEED_PASSWORD = process.env.ADMIN_SEED_PASSWORD || 'AdminPassword123!';
 
 type ParentId = string | number | bigint | Date;
 type ParentFieldValue = ParentId | boolean | Buffer | null;
@@ -1517,6 +1520,25 @@ function logSampleAuthCredentials(model: SeedModelConfig): void {
   );
 }
 
+async function seedAdminUser(): Promise<void> {
+  const userDelegate = getDelegate('user');
+  const passwordHash = await bcrypt.hash(ADMIN_SEED_PASSWORD, 12);
+
+  await userDelegate.create({
+    data: {
+      name: ADMIN_SEED_NAME,
+      email: ADMIN_SEED_EMAIL,
+      password: passwordHash,
+      role: 'ADMIN',
+      isVerified: true,
+    },
+  });
+
+  console.log(
+    `Seeded admin credentials -> email: ${ADMIN_SEED_EMAIL}, password: ${ADMIN_SEED_PASSWORD}`
+  );
+}
+
 async function main() {
   assertSupportedRelations();
   console.log(`Seeding database (${SEED_COUNT} records per model)...`);
@@ -1537,6 +1559,12 @@ async function main() {
     seedRecordIndex = null;
     await primeParentRows(model, parentRows);
 
+    if (model.name === 'User') {
+      seedPhase = 'create-records';
+      seedRecordIndex = null;
+      await seedAdminUser();
+    }
+
     for (let i = 0; i < SEED_COUNT; i++) {
       seedPhase = 'create-records';
       seedModelName = model.name;
@@ -1549,7 +1577,8 @@ async function main() {
       );
     }
 
-    console.log(`Seeded ${model.name}: ${SEED_COUNT} records`);
+    const seededCount = model.name === 'User' ? SEED_COUNT + 1 : SEED_COUNT;
+    console.log(`Seeded ${model.name}: ${seededCount} records`);
     logSampleAuthCredentials(model);
   }
 

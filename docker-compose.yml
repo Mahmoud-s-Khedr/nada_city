@@ -6,7 +6,8 @@ services:
     ports:
       - "${PORT:-3000}:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
+      - EXPOSE_TEST_TOKENS=true
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/nada_city?schema=public
       - "JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env (min 32 chars). Run: openssl rand -base64 32}"
       - REDIS_URL=redis://redis:6379

@@ -11,6 +11,33 @@ import { ProblemDetail } from '../../middlewares/error.middleware.js';
 export class FavoriteService {
   private repo = new FavoriteRepository();
 
+  private normalizeWriteData(data: CreateFavoriteInput | PatchFavoriteInput, userId?: string): Record<string, unknown> {
+    const normalized: Record<string, unknown> = {};
+
+    if (userId) {
+      normalized.user = { connect: { id: userId } };
+    }
+    if (data.type !== undefined) {
+      normalized.type = data.type;
+    }
+    if (data.galleryItemId !== undefined) {
+      normalized.galleryItem = data.galleryItemId ? { connect: { id: data.galleryItemId } } : { disconnect: true };
+    }
+    if (data.unitId !== undefined) {
+      normalized.unit = data.unitId ? { connect: { id: data.unitId } } : { disconnect: true };
+    }
+    if (data.finishId !== undefined) {
+      normalized.finish = data.finishId ? { connect: { id: data.finishId } } : { disconnect: true };
+    }
+    if (data.furnitureItemId !== undefined) {
+      normalized.furnitureItem = data.furnitureItemId
+        ? { connect: { id: data.furnitureItemId } }
+        : { disconnect: true };
+    }
+
+    return normalized;
+  }
+
   /**
    * Find many favorites with pagination, sorting, and filtering.
    */
@@ -29,10 +56,7 @@ export class FavoriteService {
    * Create a new favorite.
    */
   async create(data: CreateFavoriteInput, userId: string): Promise<Favorite> {
-    const result = await this.repo.create({
-      ...data,
-      user: { connect: { id: userId } },
-    });
+    const result = await this.repo.create(this.normalizeWriteData(data, userId));
     return result;
   }
 
@@ -57,7 +81,7 @@ export class FavoriteService {
         detail: 'You can only modify your own favorites.',
       });
     }
-    const result = await this.repo.update(key, data as Record<string, unknown>);
+    const result = await this.repo.update(key, this.normalizeWriteData(data));
     return result;
   }
 

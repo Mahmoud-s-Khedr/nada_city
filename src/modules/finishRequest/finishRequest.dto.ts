@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { decimalNumberSchema } from '../../utils/zod-schemas.js';
 
 /**
  * FinishRequest DTOs (Data Transfer Objects)
@@ -113,7 +114,7 @@ export const FinishRequest_FinishRelationSchema = z.object({
   id: z.string().optional(),
   title: z.string(),
   description: z.string(),
-  price: z.number(),
+  price: decimalNumberSchema,
   type: FinishTypeSchema,
   subType: z.string(),
   imageUrls: z.array(z.string()).optional(),

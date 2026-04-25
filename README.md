@@ -290,7 +290,25 @@ cyclic/self relations fail fast before cleanup.
 ## Docker
 
 \`\`\`bash
-docker compose up
+# 1) Create an env file (required for JWT_SECRET and optional DB credentials/ports)
+cp .env.example .env
+
+# 2) Set a strong JWT secret (32+ chars)
+# Example:
+openssl rand -base64 32
+# Then paste it into JWT_SECRET in .env
+
+# 3) Build and start API + Postgres + Redis
+docker compose up --build -d
+
+# 4) Follow logs (optional)
+docker compose logs -f app
+
+# 5) Stop everything
+docker compose down
+
+# 6) Stop + remove DB volume too (optional, deletes local DB data)
+docker compose down -v
 \`\`\`
 
 Docker startup bootstraps the schema automatically before the server starts.
@@ -299,6 +317,12 @@ If no real migration directories exist yet, it falls back to \`prisma db push\`
 so fresh generated projects can still boot in Docker.
 Keep Docker BuildKit enabled so the generated Dockerfile can reuse pnpm and
 node-gyp caches during image builds.
+
+After startup:
+
+- API: [http://localhost:3000](http://localhost:3000)
+- Swagger UI: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- Health check: [http://localhost:3000/health](http://localhost:3000/health)
 
 ## Project Structure
 
