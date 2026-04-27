@@ -55,7 +55,7 @@ vi.mock('../../config/database.js', () => ({
 const { app } = await import('../../app.js');
 
 const authToken = jwt.sign(
-  { id: 'test-user-id', role: '"ADMIN"' },
+  { id: 'test-user-id', role: 'ADMIN' },
   env.JWT_SECRET
 );
 const testId = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);

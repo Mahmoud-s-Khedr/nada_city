@@ -55,19 +55,21 @@ router.get('/:id', authenticate, async (req, res, next) => {
 router.post('/', authenticate, authorize('USER', 'ADMIN'), validate(CreateBookingRequestPublicSchema), async (req, res, next) => {
   try {
     const body = req.body as z.infer<typeof CreateBookingRequestPublicSchema>;
-    const unit = await prisma.unit.findUnique({ where: { id: body.unitId } });
-    if (!unit || unit.deletedAt || unit.availability !== 'AVAILABLE') {
-      throw new ProblemDetail({ type: 'validation-error', title: 'Invalid Unit', status: 422, detail: 'Booking requires an available existing unit.' });
-    }
-    const created = await prisma.bookingRequest.create({
-      data: {
-        unitId: body.unitId,
-        userId: getAuthUserId(req),
-        name: body.name,
-        phone: body.phone,
-        address: body.address,
-        details: body.details,
-      },
+    const created = await prisma.$transaction(async (tx) => {
+      const unit = await tx.unit.findUnique({ where: { id: body.unitId } });
+      if (!unit || unit.deletedAt || unit.availability !== 'AVAILABLE') {
+        throw new ProblemDetail({ type: 'validation-error', title: 'Invalid Unit', status: 422, detail: 'Booking requires an available existing unit.' });
+      }
+      return tx.bookingRequest.create({
+        data: {
+          unitId: body.unitId,
+          userId: getAuthUserId(req),
+          name: body.name,
+          phone: body.phone,
+          address: body.address,
+          details: body.details,
+        },
+      });
     });
     sendCreated(res, created);
   } catch (error) {

@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import type { SignOptions } from 'jsonwebtoken';
@@ -59,7 +60,7 @@ const ResetPasswordSchema = z.object({
 }).strict();
 
 function createOtpCode(): string {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(randomInt(100000, 1000000));
 }
 
 function withOptionalDevToken<T extends Record<string, unknown>>(
@@ -216,7 +217,7 @@ router.post('/refresh', validate(RefreshSchema), async (req, res, next) => {
       });
     }
     await redis.del(`refresh_token:${refreshToken}`);
-    const user = await prisma.user.findUnique({ where: { id: userId as any } });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new ProblemDetail({
         type: 'unauthorized',

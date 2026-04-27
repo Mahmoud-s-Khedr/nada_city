@@ -27,7 +27,6 @@ export const CreateFinishSchema = z.object({
   subType: z.string(),
   imageUrls: z.array(z.string()).optional(),
   videoUrls: z.array(z.string()).optional(),
-  deletedAt: z.string().datetime().optional(),
 });
 
 /**

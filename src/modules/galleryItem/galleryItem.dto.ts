@@ -26,7 +26,6 @@ export const CreateGalleryItemSchema = z.object({
   type: GalleryItemTypeSchema,
   imageUrls: z.array(z.string()).optional(),
   videoUrls: z.array(z.string()).optional(),
-  deletedAt: z.string().datetime().optional(),
 });
 
 /**

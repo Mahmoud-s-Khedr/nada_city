@@ -23,7 +23,6 @@ export const Unit_LocationInput = z.object({
     address: z.string(),
     latitude: z.number().optional(),
     longitude: z.number().optional(),
-    deletedAt: z.string().datetime().optional(),
   }).optional(),
   connect: z.object({
     id: z.string(),
@@ -47,8 +46,6 @@ export const CreateUnitSchema = z.object({
   type: UnitTypeSchema,
   imageUrls: z.array(z.string()).optional(),
   videoUrls: z.array(z.string()).optional(),
-  acceptedSellRequestId: z.string().optional(), // Must be unique
-  deletedAt: z.string().datetime().optional(),
   location: Unit_LocationInput,
 });
 
