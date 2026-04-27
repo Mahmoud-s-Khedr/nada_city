@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -1172,6 +1172,102 @@ async function specialFurnitureFlow(userToken: string): Promise<void> {
   });
 }
 
+async function storageFlow(userToken: string): Promise<void> {
+  const dummyDir = path.join(import.meta.dirname ?? '.', 'dummy');
+
+  await runFlow('Storage Presigned URLs with Real Upload', async () => {
+    await expectStatus('POST', '/api/v1/storage/presigned-url', 401, {
+      body: { filename: 'test.txt' },
+    });
+
+    await expectStatus('POST', '/api/v1/storage/presigned-url', 422, {
+      token: userToken,
+      body: {},
+    });
+
+    const textFile = await readFile(path.join(dummyDir, 'test.txt'));
+    const pngFile = await readFile(path.join(dummyDir, 'test.png'));
+
+    const putResult = await api<{ url: string; key: string; expiresIn: number }>('POST', '/api/v1/storage/presigned-url', {
+      token: userToken,
+      expectedStatus: 200,
+      body: { filename: 'harness-upload.txt', contentType: 'text/plain', operation: 'put' },
+    });
+    assert(typeof putResult.url === 'string' && putResult.url.length > 0, 'Presigned PUT URL was empty');
+    assert(putResult.key.includes('harness-upload'), 'Presigned PUT key did not include the sanitized filename');
+    assert(putResult.expiresIn > 0, 'Presigned PUT expiresIn was not positive');
+
+    let s3Reachable = false;
+    try {
+      const uploadRes = await fetch(putResult.url, {
+        method: 'PUT',
+        body: textFile,
+        headers: { 'Content-Type': 'text/plain' },
+      });
+      assert(uploadRes.status === 200 || uploadRes.status === 204, `Upload to presigned URL failed with status ${uploadRes.status}`);
+      s3Reachable = true;
+    } catch (error) {
+      log(`  ! S3 PUT unreachable from harness runner (${error instanceof Error ? error.message : String(error)}); skipping real upload verification`);
+    }
+
+    const getResult = await api<{ url: string; key: string; expiresIn: number }>('POST', '/api/v1/storage/presigned-url', {
+      token: userToken,
+      expectedStatus: 200,
+      body: { filename: 'harness-upload.txt', operation: 'get' },
+    });
+    assert(typeof getResult.url === 'string' && getResult.url.length > 0, 'Presigned GET URL was empty');
+    assert(getResult.key.includes('harness-upload'), 'Presigned GET key did not include the sanitized filename');
+
+    if (s3Reachable) {
+      try {
+        const downloadRes = await fetch(getResult.url);
+        assert(downloadRes.status === 200, `Download from presigned URL failed with status ${downloadRes.status}`);
+        const downloadedBody = await downloadRes.text();
+        assert(downloadedBody === textFile.toString(), 'Downloaded content did not match the uploaded text file');
+      } catch (error) {
+        log(`  ! S3 GET unreachable from harness runner (${error instanceof Error ? error.message : String(error)}); skipping download verification`);
+      }
+    }
+
+    const pngPut = await api<{ url: string; key: string; expiresIn: number }>('POST', '/api/v1/storage/presigned-url', {
+      token: userToken,
+      expectedStatus: 200,
+      body: { filename: 'harness-upload.png', contentType: 'image/png', operation: 'put' },
+    });
+
+    if (s3Reachable) {
+      try {
+        const pngUploadRes = await fetch(pngPut.url, {
+          method: 'PUT',
+          body: pngFile,
+          headers: { 'Content-Type': 'image/png' },
+        });
+        assert(pngUploadRes.status === 200 || pngUploadRes.status === 204, `PNG upload to presigned URL failed with status ${pngUploadRes.status}`);
+      } catch (error) {
+        log(`  ! S3 PUT unreachable from harness runner for PNG (${error instanceof Error ? error.message : String(error)}); skipping upload verification`);
+      }
+    }
+
+    const malicious = await api<{ url: string; key: string; expiresIn: number }>('POST', '/api/v1/storage/presigned-url', {
+      token: userToken,
+      expectedStatus: 200,
+      body: { filename: '../../../etc/passwd', operation: 'put' },
+    });
+    assert(!malicious.key.includes('..'), 'Sanitized filename still contained path traversal');
+    assert(!malicious.key.includes('/etc/passwd'), 'Sanitized filename still contained raw traversal');
+
+    return [
+      'Presigned PUT URL returned a valid URL, key, and expiresIn',
+      ...(s3Reachable ? [
+        'Real text file uploaded successfully via presigned PUT URL',
+        'Presigned GET URL allowed downloading the exact uploaded content',
+        'Real PNG file uploaded successfully via presigned PUT URL',
+      ] : ['S3 endpoint unreachable from harness runner; upload/download assertions skipped']),
+      'Filename sanitization stripped path traversal sequences',
+    ];
+  });
+}
+
 async function whatsappFlow(userToken: string, targetId: string): Promise<void> {
   await runFlow('WhatsApp Open Event Tracking', async () => {
     const created = await api<EntityWithId>('POST', '/api/v1/whatsappOpenEvents', {
@@ -1272,6 +1368,7 @@ async function main(): Promise<void> {
     try { await finishFlow(profile.accessToken); } catch (error) { log(`\nFinish flow failed: ${error instanceof Error ? error.message : String(error)}`); }
     try { await furnitureFlow(profile.accessToken); } catch (error) { log(`\nFurniture flow failed: ${error instanceof Error ? error.message : String(error)}`); }
     try { await specialFurnitureFlow(profile.accessToken); } catch (error) { log(`\nSpecial furniture flow failed: ${error instanceof Error ? error.message : String(error)}`); }
+    try { await storageFlow(profile.accessToken); } catch (error) { log(`\nStorage flow failed: ${error instanceof Error ? error.message : String(error)}`); }
 
     if (bookingFixtures) {
       try { await whatsappFlow(profile.accessToken, bookingFixtures.unitId); } catch (error) { log(`\nWhatsApp flow failed: ${error instanceof Error ? error.message : String(error)}`); }

@@ -84,6 +84,7 @@ export const SRS_CLIENT_FLOW_ROUTES: CoveredRoute[] = [
   { method: 'POST', path: '/api/v1/whatsappOpenEvents', reason: 'WhatsApp tracking flow' },
   { method: 'GET', path: '/api/v1/whatsappOpenEvents', reason: 'WhatsApp tracking flow' },
   { method: 'GET', path: '/api/v1/whatsappOpenEvents/:id', reason: 'WhatsApp tracking flow' },
+  { method: 'POST', path: '/api/v1/storage/presigned-url', reason: 'Storage upload flow' },
 ];
 
 export const SRS_CLIENT_FLOW_ROUTE_KEYS = new Set(
