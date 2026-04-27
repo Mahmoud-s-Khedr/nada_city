@@ -10,6 +10,7 @@ import {
   type ValidationMetadata,
 } from '../middlewares/validation.middleware.js';
 import { authRoutes } from '../modules/auth/auth.routes.js';
+import { storageRoutes } from '../modules/storage/storage.routes.js';
 import { bookingRequestRoutes } from '../modules/bookingRequest/bookingRequest.routes.js';
 import { commentRoutes } from '../modules/comment/comment.routes.js';
 import { favoriteRoutes } from '../modules/favorite/favorite.routes.js';
@@ -49,6 +50,7 @@ type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
 const mountedRouters: MountedRouter[] = [
   { basePath: '/api/v1/auth', tag: 'Auth', router: authRoutes as ExpressRouter },
+  { basePath: '/api/v1/storage', tag: 'Storage', router: storageRoutes as ExpressRouter },
   { basePath: '/api/v1/users', tag: 'Users', router: userRoutes as ExpressRouter },
   { basePath: '/api/v1/galleryItems', tag: 'Gallery Items', router: galleryItemRoutes as ExpressRouter },
   { basePath: '/api/v1/comments', tag: 'Comments', router: commentRoutes as ExpressRouter },

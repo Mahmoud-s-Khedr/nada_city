@@ -26,6 +26,7 @@ import { specialFurnitureRequestRoutes } from './modules/specialFurnitureRequest
 import { favoriteRoutes } from './modules/favorite/favorite.routes.js';
 import { whatsappOpenEventRoutes } from './modules/whatsappOpenEvent/whatsappOpenEvent.routes.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
+import { storageRoutes } from './modules/storage/storage.routes.js';
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.get('/health', (_req, res) => {
 
 // -- API Routes (v1)
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/storage', storageRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/galleryItems', galleryItemRoutes);
 app.use('/api/v1/comments', commentRoutes);
