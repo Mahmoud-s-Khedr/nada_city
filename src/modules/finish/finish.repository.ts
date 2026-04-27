@@ -58,16 +58,14 @@ export class FinishRepository {
     const include = this.toInclude(options.include);
     const [data, total] = await Promise.all([
       prisma.finish.findMany({
-
-        where: { ...options.where, deletedAt: null },
-
+        where: options.where,
         orderBy: options.orderBy,
         skip: options.skip,
         take: options.take,
         ...(include ? { include } : {}),
       }),
 
-      prisma.finish.count({ where: { ...options.where, deletedAt: null } }),
+      prisma.finish.count({ where: options.where }),
 
     ]);
     return { data, total };

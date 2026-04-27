@@ -46,7 +46,6 @@ export const FinishRequest_FinishInput = z.object({
     subType: z.string(),
     imageUrls: z.array(z.string()).optional(),
     videoUrls: z.array(z.string()).optional(),
-    deletedAt: z.string().datetime().optional(),
   }).optional(),
   connect: z.object({
     id: z.string(),

@@ -21,7 +21,6 @@ export const CreateLocationSchema = z.object({
   address: z.string(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  deletedAt: z.string().datetime().optional(),
 });
 
 /**

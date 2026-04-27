@@ -2,8 +2,14 @@ import type { Express } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { logger } from './logger.js';
 import { buildOpenApiDocument } from './openapi.js';
+import { env } from './env.js';
 
 export function setupSwagger(app: Express): void {
+  if (env.NODE_ENV === 'production') {
+    logger.warn('Swagger UI is disabled in production to prevent API spec exposure');
+    return;
+  }
+
   try {
     const spec = buildOpenApiDocument();
     app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(spec, {

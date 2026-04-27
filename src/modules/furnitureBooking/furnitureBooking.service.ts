@@ -1,7 +1,13 @@
 import type { QueryOptions } from '../../utils/query-builder.js';
 import type { FurnitureBooking } from '@prisma/client';
 import type { CreateFurnitureBookingInput, PatchFurnitureBookingInput } from './furnitureBooking.dto.js';
+import { ReviewFurnitureBookingSchema } from './furnitureBooking.dto.js';
 import { FurnitureBookingRepository, type FurnitureBookingKey } from './furnitureBooking.repository.js';
+import { ProblemDetail } from '../../middlewares/error.middleware.js';
+import { prisma } from '../../config/database.js';
+import { z } from 'zod';
+
+export type ReviewFurnitureBookingInput = z.infer<typeof ReviewFurnitureBookingSchema>;
 
 /**
  * FurnitureBooking Service
@@ -57,5 +63,39 @@ export class FurnitureBookingService {
    */
   async delete(key: FurnitureBookingKey): Promise<void> {
     await this.repo.delete(key);
+  }
+
+  async findAll(filters: { status?: string; userId?: string; furnitureItemId?: string }): Promise<FurnitureBooking[]> {
+    const where: Record<string, unknown> = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.userId) where.userId = filters.userId;
+    if (filters.furnitureItemId) where.furnitureItemId = filters.furnitureItemId;
+    return prisma.furnitureBooking.findMany({ where, include: { user: true, furnitureItem: true }, orderBy: { createdAt: 'desc' } });
+  }
+
+  async findByUserId(userId: string): Promise<FurnitureBooking[]> {
+    return prisma.furnitureBooking.findMany({ where: { userId }, include: { furnitureItem: true }, orderBy: { createdAt: 'desc' } });
+  }
+
+  async cancel(key: FurnitureBookingKey): Promise<void> {
+    const item = await this.repo.findOne(key);
+    if (!item) {
+      throw new ProblemDetail({ type: 'not-found', title: 'Not Found', status: 404, detail: 'Furniture booking not found.' });
+    }
+    if (item.status !== 'PENDING') {
+      throw new ProblemDetail({ type: 'validation-error', title: 'Invalid Status', status: 422, detail: 'Only pending furniture bookings can be cancelled.' });
+    }
+    await this.repo.update(key, { status: 'CANCELLED' });
+  }
+
+  async review(key: FurnitureBookingKey, data: ReviewFurnitureBookingInput): Promise<FurnitureBooking> {
+    const item = await this.repo.findOne(key);
+    if (!item) {
+      throw new ProblemDetail({ type: 'not-found', title: 'Not Found', status: 404, detail: 'Furniture booking not found.' });
+    }
+    if (item.status !== 'PENDING') {
+      throw new ProblemDetail({ type: 'validation-error', title: 'Invalid Status', status: 422, detail: 'Only pending furniture bookings can be reviewed.' });
+    }
+    return this.repo.update(key, { status: data.status, adminNote: data.adminNote });
   }
 }

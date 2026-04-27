@@ -1,4 +1,4 @@
-import { randomInt } from 'node:crypto';
+import crypto, { randomInt } from 'node:crypto';
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import type { SignOptions } from 'jsonwebtoken';
@@ -8,12 +8,16 @@ import { prisma } from '../../config/database.js';
 import { env } from '../../config/env.js';
 import { redis } from '../../config/redis.js';
 import { validate } from '../../middlewares/validation.middleware.js';
+import { createRouteRateLimit } from '../../middlewares/rate-limit.middleware.js';
 import { ProblemDetail } from '../../middlewares/error.middleware.js';
 import { sendSuccess, sendNoContent } from '../../utils/response.js';
 import { assertStrongPassword } from '../../utils/password.js';
 import { tokenDeliveryProvider } from './token-delivery.js';
 
 const router = Router();
+
+const authRateLimit = createRouteRateLimit(5, 15 * 60 * 1000);
+const refreshRateLimit = createRouteRateLimit(10, 15 * 60 * 1000);
 
 const REFRESH_TOKEN_TTL = parseInt(process.env.REFRESH_TOKEN_TTL || String(7 * 24 * 60 * 60), 10);
 
@@ -93,7 +97,7 @@ async function issueAccessAndRefreshTokens(user: { id: string; role: string; ema
   return { accessToken, refreshToken };
 }
 
-router.post('/register', validate(RegisterSchema), async (req, res, next) => {
+router.post('/register', authRateLimit, validate(RegisterSchema), async (req, res, next) => {
   try {
     const { name, email, password, phone, address } = req.body as z.infer<typeof RegisterSchema>;
     assertStrongPassword(password);
@@ -134,7 +138,7 @@ router.post('/register', validate(RegisterSchema), async (req, res, next) => {
   }
 });
 
-router.post('/verify-otp', validate(VerifyOtpSchema), async (req, res, next) => {
+router.post('/verify-otp', authRateLimit, validate(VerifyOtpSchema), async (req, res, next) => {
   try {
     const { email, code } = req.body as z.infer<typeof VerifyOtpSchema>;
     const token = await prisma.otpToken.findFirst({
@@ -166,10 +170,10 @@ router.post('/verify-otp', validate(VerifyOtpSchema), async (req, res, next) => 
       });
     }
 
-    await prisma.$transaction([
-      prisma.otpToken.update({ where: { id: token.id }, data: { consumed: true } }),
-      prisma.user.update({ where: { id: user.id }, data: { isVerified: true } }),
-    ]);
+    await prisma.$transaction(async (tx) => {
+      await tx.otpToken.update({ where: { id: token.id }, data: { consumed: true } });
+      await tx.user.update({ where: { id: user.id }, data: { isVerified: true } });
+    });
 
     sendSuccess(res, { verified: true });
   } catch (error) {
@@ -177,7 +181,7 @@ router.post('/verify-otp', validate(VerifyOtpSchema), async (req, res, next) => 
   }
 });
 
-router.post('/login', validate(LoginSchema), async (req, res, next) => {
+router.post('/login', authRateLimit, validate(LoginSchema), async (req, res, next) => {
   try {
     const { email, password } = req.body as z.infer<typeof LoginSchema>;
     const user = await prisma.user.findUnique({ where: { email } });
@@ -204,7 +208,7 @@ router.post('/login', validate(LoginSchema), async (req, res, next) => {
   }
 });
 
-router.post('/refresh', validate(RefreshSchema), async (req, res, next) => {
+router.post('/refresh', refreshRateLimit, validate(RefreshSchema), async (req, res, next) => {
   try {
     const { refreshToken } = req.body as z.infer<typeof RefreshSchema>;
     const userId = await redis.get(`refresh_token:${refreshToken}`);
@@ -232,7 +236,7 @@ router.post('/refresh', validate(RefreshSchema), async (req, res, next) => {
   }
 });
 
-router.post('/logout', validate(RefreshSchema), async (req, res, next) => {
+router.post('/logout', authRateLimit, validate(RefreshSchema), async (req, res, next) => {
   try {
     const { refreshToken } = req.body as z.infer<typeof RefreshSchema>;
     await redis.del(`refresh_token:${refreshToken}`);
@@ -242,7 +246,7 @@ router.post('/logout', validate(RefreshSchema), async (req, res, next) => {
   }
 });
 
-router.post('/forgot-password', validate(ForgotPasswordSchema), async (req, res, next) => {
+router.post('/forgot-password', authRateLimit, validate(ForgotPasswordSchema), async (req, res, next) => {
   try {
     const { email } = req.body as z.infer<typeof ForgotPasswordSchema>;
     const user = await prisma.user.findUnique({ where: { email } });
@@ -272,7 +276,7 @@ router.post('/forgot-password', validate(ForgotPasswordSchema), async (req, res,
   }
 });
 
-router.post('/reset-password', validate(ResetPasswordSchema), async (req, res, next) => {
+router.post('/reset-password', authRateLimit, validate(ResetPasswordSchema), async (req, res, next) => {
   try {
     const { token, password } = req.body as z.infer<typeof ResetPasswordSchema>;
     assertStrongPassword(password);
@@ -298,10 +302,10 @@ router.post('/reset-password', validate(ResetPasswordSchema), async (req, res, n
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    await prisma.$transaction([
-      prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { consumed: true } }),
-      prisma.user.update({ where: { id: user.id }, data: { password: passwordHash } }),
-    ]);
+    await prisma.$transaction(async (tx) => {
+      await tx.passwordResetToken.update({ where: { id: resetToken.id }, data: { consumed: true } });
+      await tx.user.update({ where: { id: user.id }, data: { password: passwordHash } });
+    });
     sendSuccess(res, { reset: true });
   } catch (error) {
     next(error);

@@ -21,7 +21,6 @@ export const FurnitureBooking_FurnitureItemInput = z.object({
     price: z.number(),
     imageUrls: z.array(z.string()).optional(),
     videoUrls: z.array(z.string()).optional(),
-    deletedAt: z.string().datetime().optional(),
   }).optional(),
   connect: z.object({
     id: z.string(),

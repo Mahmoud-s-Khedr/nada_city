@@ -100,6 +100,8 @@ model OtpToken {
   createdAt DateTime @default(now())
 
   @@index([email])
+  @@index([expiresAt])
+  @@index([email, expiresAt])
 }
 model PasswordResetToken {
   id String @id @default(cuid())
@@ -111,6 +113,8 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 
   @@index([email])
+  @@index([expiresAt])
+  @@index([email, expiresAt])
 }
 model GalleryItem {
   id String @id @default(cuid())

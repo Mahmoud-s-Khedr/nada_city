@@ -58,16 +58,14 @@ export class FurnitureItemRepository {
     const include = this.toInclude(options.include);
     const [data, total] = await Promise.all([
       prisma.furnitureItem.findMany({
-
-        where: { ...options.where, deletedAt: null },
-
+        where: options.where,
         orderBy: options.orderBy,
         skip: options.skip,
         take: options.take,
         ...(include ? { include } : {}),
       }),
 
-      prisma.furnitureItem.count({ where: { ...options.where, deletedAt: null } }),
+      prisma.furnitureItem.count({ where: options.where }),
 
     ]);
     return { data, total };

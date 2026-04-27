@@ -32,7 +32,6 @@ export const CreateUserSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   rate: z.number().optional(),
-  role: RoleSchema.optional(),
   isVerified: z.boolean().optional(),
 });
 

@@ -60,16 +60,14 @@ export class UnitRepository {
     const include = this.toInclude(options.include);
     const [data, total] = await Promise.all([
       prisma.unit.findMany({
-
-        where: { ...options.where, deletedAt: null },
-
+        where: options.where,
         orderBy: options.orderBy,
         skip: options.skip,
         take: options.take,
         ...(include ? { include } : {}),
       }),
 
-      prisma.unit.count({ where: { ...options.where, deletedAt: null } }),
+      prisma.unit.count({ where: options.where }),
 
     ]);
     return { data, total };

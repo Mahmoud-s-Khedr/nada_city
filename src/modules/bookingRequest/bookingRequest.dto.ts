@@ -29,8 +29,6 @@ export const BookingRequest_UnitInput = z.object({
     imageUrls: z.array(z.string()).optional(),
     videoUrls: z.array(z.string()).optional(),
     locationId: z.string(),
-    acceptedSellRequestId: z.string().optional(),
-    deletedAt: z.string().datetime().optional(),
   }).optional(),
   connect: z.object({
     id: z.string(),

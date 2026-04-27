@@ -12,9 +12,9 @@ const controller = new CommentController();
 
 
 
-router.get('/', (req, res, next) => controller.list(req, res, next));
-router.get('/cursor', (req, res, next) => controller.listCursor(req, res, next));
-router.get('/:id', (req, res, next) => controller.getOne(req, res, next));
+router.get('/', authenticate, (req, res, next) => controller.list(req, res, next));
+router.get('/cursor', authenticate, (req, res, next) => controller.listCursor(req, res, next));
+router.get('/:id', authenticate, (req, res, next) => controller.getOne(req, res, next));
 
 router.post('/', authenticate, authorize('USER', 'ADMIN'), validate(CreateCommentSchema), (req, res, next) => controller.create(req, res, next));
 router.put('/:id', authenticate, authorize('USER', 'ADMIN'), validate(UpdateCommentSchema), (req, res, next) => controller.update(req, res, next));

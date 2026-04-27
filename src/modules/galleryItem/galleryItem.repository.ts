@@ -59,16 +59,14 @@ export class GalleryItemRepository {
     const include = this.toInclude(options.include);
     const [data, total] = await Promise.all([
       prisma.galleryItem.findMany({
-
-        where: { ...options.where, deletedAt: null },
-
+        where: options.where,
         orderBy: options.orderBy,
         skip: options.skip,
         take: options.take,
         ...(include ? { include } : {}),
       }),
 
-      prisma.galleryItem.count({ where: { ...options.where, deletedAt: null } }),
+      prisma.galleryItem.count({ where: options.where }),
 
     ]);
     return { data, total };

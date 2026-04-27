@@ -12,8 +12,8 @@ const controller = new FavoriteController();
 
 
 
-router.get('/', (req, res, next) => controller.list(req, res, next));
-router.get('/:id', (req, res, next) => controller.getOne(req, res, next));
+router.get('/', authenticate, (req, res, next) => controller.list(req, res, next));
+router.get('/:id', authenticate, (req, res, next) => controller.getOne(req, res, next));
 
 router.post('/', authenticate, authorize('USER', 'ADMIN'), validate(CreateFavoriteSchema), (req, res, next) => controller.create(req, res, next));
 router.put('/:id', authenticate, authorize('USER', 'ADMIN'), validate(UpdateFavoriteSchema), (req, res, next) => controller.update(req, res, next));

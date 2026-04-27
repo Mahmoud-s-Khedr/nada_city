@@ -1,4 +1,5 @@
 import { logger } from '../../config/logger.js';
+import { env } from '../../config/env.js';
 
 export interface TokenDeliveryPayload {
   email: string;
@@ -16,4 +17,13 @@ class DevTokenDeliveryProvider implements TokenDeliveryProvider {
   }
 }
 
-export const tokenDeliveryProvider: TokenDeliveryProvider = new DevTokenDeliveryProvider();
+class ProductionTokenDeliveryProvider implements TokenDeliveryProvider {
+  async send(_payload: TokenDeliveryPayload): Promise<void> {
+    throw new Error('Production token delivery provider is not implemented. Configure email/SMS delivery.');
+  }
+}
+
+export const tokenDeliveryProvider: TokenDeliveryProvider =
+  env.NODE_ENV === 'production'
+    ? new ProductionTokenDeliveryProvider()
+    : new DevTokenDeliveryProvider();

@@ -134,6 +134,7 @@ export class FinishController {
         allowedIncludeRelations: ALLOWED_INCLUDE_RELATIONS,
         filterFieldTypes: FILTER_FIELD_TYPES,
         defaultSortField: DEFAULT_SORT_FIELD,
+        softDeleteField: 'deletedAt',
       });
       const { data, total } = await service.findMany(options);
       const hasInclude = !!options.include && Object.keys(options.include).length > 0;

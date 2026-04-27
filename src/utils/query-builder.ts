@@ -21,6 +21,9 @@ export interface QueryBuilderConfig {
   allowedIncludeRelations?: string[];
   filterFieldTypes?: Record<string, FilterFieldType>;
   defaultSortField?: string;
+  maxIncludeCount?: number;
+  /** When provided, automatically injects `{ [softDeleteField]: null }` into the where clause. */
+  softDeleteField?: string;
 }
 
 export interface QueryOptions {
@@ -99,6 +102,8 @@ export function buildQueryOptions(
     allowedIncludeRelations = [],
     filterFieldTypes = {},
     defaultSortField,
+    maxIncludeCount = 5,
+    softDeleteField,
   } = config;
 
   const pageRaw = parseInt(String(query.page ?? '1'), 10);
@@ -120,6 +125,9 @@ export function buildQueryOptions(
 
   // Filtering — only allow known fields, parse by field type
   const where: Record<string, any> = {};
+  if (softDeleteField) {
+    where[softDeleteField] = null;
+  }
   if (query.filter && typeof query.filter === 'object' && !Array.isArray(query.filter)) {
     for (const [key, value] of Object.entries(query.filter)) {
       if (allowedFilterFields.length > 0 && !allowedFilterFields.includes(key)) {
@@ -148,6 +156,14 @@ export function buildQueryOptions(
       .split(',')
       .map((r: string) => r.trim())
       .filter(Boolean);
+    if (relations.length > maxIncludeCount) {
+      throw new ProblemDetail({
+        type: 'validation-error',
+        title: 'Too Many Includes',
+        status: 422,
+        detail: `Cannot include more than ${maxIncludeCount} relations per request.`,
+      });
+    }
     const invalidRelations = relations.filter(
       (relation) => !allowedIncludeRelations.includes(relation)
     );
