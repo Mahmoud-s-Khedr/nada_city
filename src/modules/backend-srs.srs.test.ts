@@ -52,7 +52,6 @@ const prismaMock = {
   furnitureBooking: createDelegateMock(),
   specialFurnitureRequest: createDelegateMock(),
   favorite: createDelegateMock(),
-  whatsappOpenEvent: createDelegateMock(),
   $transaction: vi.fn(async (input: any) => {
     if (typeof input === 'function') {
       return input(prismaMock);

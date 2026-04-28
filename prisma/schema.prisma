@@ -55,16 +55,6 @@ enum ReactionType {
   WOW
 }
 
-enum WhatsappModule {
-  GALLERY
-  UNIT
-  FINISH
-  FURNITURE
-  BOOKING
-  SELL_UNIT
-  ORDER_UNIT
-  SPECIAL_FURNITURE
-}
 model User {
   id String @id @default(cuid())
   name String
@@ -86,7 +76,6 @@ model User {
   finishRequests            FinishRequest[]
   furnitureBookings         FurnitureBooking[]
   specialFurnitureRequests  SpecialFurnitureRequest[]
-  whatsappOpenEvents        WhatsappOpenEvent[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -429,19 +418,4 @@ model Favorite {
   @@unique([userId, furnitureItemId])
   @@index([userId])
   @@index([type])
-}
-model WhatsappOpenEvent {
-  id String @id @default(cuid())
-
-  userId String?
-  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  module         WhatsappModule
-  targetId       String?
-  defaultMessage String
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([module])
-  @@index([createdAt])
 }

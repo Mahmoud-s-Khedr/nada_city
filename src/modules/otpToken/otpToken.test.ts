@@ -45,7 +45,6 @@ const prismaMock: Record<string, PrismaDelegateMock> = {
   furnitureBooking: createDelegateMock(),
   specialFurnitureRequest: createDelegateMock(),
   favorite: createDelegateMock(),
-  whatsappOpenEvent: createDelegateMock(),
 };
 
 vi.mock('../../config/database.js', () => ({

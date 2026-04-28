@@ -686,61 +686,6 @@ const MODEL_CONFIGS: SeedModelConfig[] = [
     "uniqueSelectors": []
   },
   {
-    "name": "WhatsappOpenEvent",
-    "clientKey": "whatsappOpenEvent",
-    "seedLabel": "whatsapp-open-event",
-    "scalarFields": [
-      {
-        "name": "targetId",
-        "type": "String",
-        "isOptional": true,
-        "isUnique": false,
-        "isAuthIdentifier": false,
-        "isAuthPassword": false
-      },
-      {
-        "name": "defaultMessage",
-        "type": "String",
-        "isOptional": false,
-        "isUnique": false,
-        "isAuthIdentifier": false,
-        "isAuthPassword": false
-      }
-    ],
-    "enumFields": [
-      {
-        "name": "module",
-        "values": [
-          "GALLERY",
-          "UNIT",
-          "FINISH",
-          "FURNITURE",
-          "BOOKING",
-          "SELL_UNIT",
-          "ORDER_UNIT",
-          "SPECIAL_FURNITURE"
-        ],
-        "isOptional": false
-      }
-    ],
-    "relationConfigs": [
-      {
-        "relationName": "user",
-        "targetModel": "User",
-        "localFields": [
-          "userId"
-        ],
-        "referenceFields": [
-          "id"
-        ],
-        "cacheKey": "User|id",
-        "required": false,
-        "omit": false
-      }
-    ],
-    "uniqueSelectors": []
-  },
-  {
     "name": "Comment",
     "clientKey": "comment",
     "seedLabel": "comment",

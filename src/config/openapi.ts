@@ -26,7 +26,6 @@ import { specialFurnitureRequestRoutes } from '../modules/specialFurnitureReques
 import { unitRoutes } from '../modules/unit/unit.routes.js';
 import { unitOrderRequestRoutes } from '../modules/unitOrderRequest/unitOrderRequest.routes.js';
 import { userRoutes } from '../modules/user/user.routes.js';
-import { whatsappOpenEventRoutes } from '../modules/whatsappOpenEvent/whatsappOpenEvent.routes.js';
 
 extendZodWithOpenApi(z);
 
@@ -66,7 +65,6 @@ const mountedRouters: MountedRouter[] = [
   { basePath: '/api/v1/furnitureBookings', tag: 'Furniture Bookings', router: furnitureBookingRoutes as ExpressRouter },
   { basePath: '/api/v1/specialFurnitureRequests', tag: 'Special Furniture Requests', router: specialFurnitureRequestRoutes as ExpressRouter },
   { basePath: '/api/v1/favorites', tag: 'Favorites', router: favoriteRoutes as ExpressRouter },
-  { basePath: '/api/v1/whatsappOpenEvents', tag: 'Whatsapp Open Events', router: whatsappOpenEventRoutes as ExpressRouter },
 ];
 
 const ApiSuccessEnvelopeSchema = z.object({

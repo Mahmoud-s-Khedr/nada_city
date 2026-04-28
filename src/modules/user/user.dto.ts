@@ -16,7 +16,6 @@ export const FavoriteTypeSchema = z.enum(['GALLERY_ITEM', 'UNIT', 'FINISH', 'FUR
 
 export const ReactionTypeSchema = z.enum(['LIKE', 'LOVE', 'WOW']);
 
-export const WhatsappModuleSchema = z.enum(['GALLERY', 'UNIT', 'FINISH', 'FURNITURE', 'BOOKING', 'SELL_UNIT', 'ORDER_UNIT', 'SPECIAL_FURNITURE']);
 
 
 /**
@@ -164,14 +163,6 @@ export const User_SpecialFurnitureRequestsRelationSchema = z.object({
   updatedAt: z.coerce.date().optional(),
 });
 
-export const User_WhatsappOpenEventsRelationSchema = z.object({
-  id: z.string().optional(),
-  userId: z.string().nullish(),
-  module: WhatsappModuleSchema,
-  targetId: z.string().nullish(),
-  defaultMessage: z.string(),
-  createdAt: z.coerce.date().optional(),
-});
 
 
 /**
@@ -205,7 +196,6 @@ export const UserWithIncludesResponseSchema = UserResponseSchema.extend({
   finishRequests: z.array(User_FinishRequestsRelationSchema).optional(),
   furnitureBookings: z.array(User_FurnitureBookingsRelationSchema).optional(),
   specialFurnitureRequests: z.array(User_SpecialFurnitureRequestsRelationSchema).optional(),
-  whatsappOpenEvents: z.array(User_WhatsappOpenEventsRelationSchema).optional(),
 });
 
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;

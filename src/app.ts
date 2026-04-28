@@ -24,7 +24,6 @@ import { furnitureItemRoutes } from './modules/furnitureItem/furnitureItem.route
 import { furnitureBookingRoutes } from './modules/furnitureBooking/furnitureBooking.routes.js';
 import { specialFurnitureRequestRoutes } from './modules/specialFurnitureRequest/specialFurnitureRequest.routes.js';
 import { favoriteRoutes } from './modules/favorite/favorite.routes.js';
-import { whatsappOpenEventRoutes } from './modules/whatsappOpenEvent/whatsappOpenEvent.routes.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { storageRoutes } from './modules/storage/storage.routes.js';
 
@@ -79,7 +78,6 @@ app.use('/api/v1/furnitureItems', furnitureItemRoutes);
 app.use('/api/v1/furnitureBookings', furnitureBookingRoutes);
 app.use('/api/v1/specialFurnitureRequests', specialFurnitureRequestRoutes);
 app.use('/api/v1/favorites', favoriteRoutes);
-app.use('/api/v1/whatsappOpenEvents', whatsappOpenEventRoutes);
 
 // -- Swagger Documentation
 setupSwagger(app);

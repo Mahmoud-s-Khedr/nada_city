@@ -81,9 +81,6 @@ export const SRS_CLIENT_FLOW_ROUTES: CoveredRoute[] = [
   { method: 'DELETE', path: '/api/v1/specialFurnitureRequests/:id', reason: 'Special furniture flow' },
   { method: 'GET', path: '/api/v1/specialFurnitureRequests', reason: 'Admin special-furniture review flow' },
   { method: 'PATCH', path: '/api/v1/specialFurnitureRequests/:id/review', reason: 'Admin special-furniture review flow' },
-  { method: 'POST', path: '/api/v1/whatsappOpenEvents', reason: 'WhatsApp tracking flow' },
-  { method: 'GET', path: '/api/v1/whatsappOpenEvents', reason: 'WhatsApp tracking flow' },
-  { method: 'GET', path: '/api/v1/whatsappOpenEvents/:id', reason: 'WhatsApp tracking flow' },
   { method: 'POST', path: '/api/v1/storage/presigned-url', reason: 'Storage upload flow' },
 ];
 

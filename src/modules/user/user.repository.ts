@@ -33,7 +33,6 @@ export class UserRepository {
     if (include.finishRequests) normalized.finishRequests = true;
     if (include.furnitureBookings) normalized.furnitureBookings = true;
     if (include.specialFurnitureRequests) normalized.specialFurnitureRequests = true;
-    if (include.whatsappOpenEvents) normalized.whatsappOpenEvents = true;
     return Object.keys(normalized).length > 0 ? normalized : undefined;
   }
 

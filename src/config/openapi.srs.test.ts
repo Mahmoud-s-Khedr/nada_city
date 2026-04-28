@@ -20,7 +20,6 @@ const mountedPrefixes = [
   '/api/v1/furnitureBookings',
   '/api/v1/specialFurnitureRequests',
   '/api/v1/favorites',
-  '/api/v1/whatsappOpenEvents',
 ];
 
 describe('OpenAPI generation', () => {

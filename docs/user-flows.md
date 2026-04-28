@@ -469,37 +469,7 @@ User, Admin
 - Do not cancel or review a special furniture request after it leaves `PENDING`.
 - Do not call `/specialFurnitureRequests/:id/review` as a non-admin user.
 
-## 11. WhatsApp Open Event Tracking
-
-**Goal**  
-Track that a user opened WhatsApp from a module with a default message.
-
-**Actors**  
-User, Admin, System
-
-**Preconditions**
-
-- The caller is authenticated.
-- The module value must be one of `GALLERY`, `UNIT`, `FINISH`, `FURNITURE`, `BOOKING`, `SELL_UNIT`, `ORDER_UNIT`, or `SPECIAL_FURNITURE`.
-
-**Flow**
-
-1. `POST /auth/login`
-2. `POST /whatsappOpenEvents`
-   Body: `module`, `defaultMessage`, optional `targetId`, optional `userId`
-3. Optional: `GET /whatsappOpenEvents?filter[module]=...`
-4. Optional: `GET /whatsappOpenEvents/:id`
-
-**Postconditions**
-
-- The open event is recorded for analytics or audit purposes.
-
-**Invalid Sequences**
-
-- Do not create a WhatsApp open event before login.
-- Do not send an unsupported module value.
-
-## 12. Admin Read Models Across Request Workflows
+## 11. Admin Read Models Across Request Workflows
 
 These admin-only collection endpoints are used after admin login to monitor workflow state before reviewing individual requests:
 

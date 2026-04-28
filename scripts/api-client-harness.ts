@@ -1268,37 +1268,6 @@ async function storageFlow(userToken: string): Promise<void> {
   });
 }
 
-async function whatsappFlow(userToken: string, targetId: string): Promise<void> {
-  await runFlow('WhatsApp Open Event Tracking', async () => {
-    const created = await api<EntityWithId>('POST', '/api/v1/whatsappOpenEvents', {
-      token: userToken,
-      expectedStatus: 201,
-      body: {
-        module: 'GALLERY',
-        targetId,
-        defaultMessage: 'Hello from the harness',
-      },
-    });
-
-    const list = await api<JsonObject[]>('GET', '/api/v1/whatsappOpenEvents', {
-      token: userToken,
-      expectedStatus: 200,
-      query: { 'filter[module]': 'GALLERY' },
-    });
-    assert(list.some((item) => item.id === created.id), 'WhatsApp event list did not include the created record');
-
-    const detail = await api<JsonObject>('GET', `/api/v1/whatsappOpenEvents/${created.id}`, {
-      token: userToken,
-      expectedStatus: 200,
-    });
-    assert(detail.id === created.id, 'WhatsApp event detail returned the wrong record');
-
-    return [
-      'WhatsApp open event creation succeeded for an authenticated user',
-      'WhatsApp event list and detail reads returned the created record',
-    ];
-  });
-}
 
 function printSummary(): void {
   const passed = results.filter((result) => result.passed).length;
@@ -1370,9 +1339,6 @@ async function main(): Promise<void> {
     try { await specialFurnitureFlow(profile.accessToken); } catch (error) { log(`\nSpecial furniture flow failed: ${error instanceof Error ? error.message : String(error)}`); }
     try { await storageFlow(profile.accessToken); } catch (error) { log(`\nStorage flow failed: ${error instanceof Error ? error.message : String(error)}`); }
 
-    if (bookingFixtures) {
-      try { await whatsappFlow(profile.accessToken, bookingFixtures.unitId); } catch (error) { log(`\nWhatsApp flow failed: ${error instanceof Error ? error.message : String(error)}`); }
-    }
   }
 
   await flushLogs();

@@ -89,9 +89,6 @@ Generated on: 2026-04-25T01:54:22.923Z
 | GET | `/api/v1/users/me` | Profile flow |
 | PATCH | `/api/v1/users/me` | Profile flow |
 | POST | `/api/v1/users/me/change-password` | Profile flow |
-| GET | `/api/v1/whatsappOpenEvents` | WhatsApp tracking flow |
-| POST | `/api/v1/whatsappOpenEvents` | WhatsApp tracking flow |
-| GET | `/api/v1/whatsappOpenEvents/:id` | WhatsApp tracking flow |
 | GET | `/health` | Health check |
 
 ## Unused Live Routes
@@ -122,10 +119,6 @@ Generated on: 2026-04-25T01:54:22.923Z
 | PATCH | `/api/v1/units/:id` | `src/modules/unit/unit.routes.ts` | Live route is available, but this specific variant is not part of the SRS client-flow coverage set. |
 | PUT | `/api/v1/units/:id` | `src/modules/unit/unit.routes.ts` | Live route is available, but this specific variant is not part of the SRS client-flow coverage set. |
 | GET | `/api/v1/units/cursor` | `src/modules/unit/unit.routes.ts` | Cursor/list variant not referenced by the SRS flow document. |
-| DELETE | `/api/v1/whatsappOpenEvents/:id` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | Live route is available, but this specific variant is not part of the SRS client-flow coverage set. |
-| PATCH | `/api/v1/whatsappOpenEvents/:id` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | Live route is available, but this specific variant is not part of the SRS client-flow coverage set. |
-| PUT | `/api/v1/whatsappOpenEvents/:id` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | Live route is available, but this specific variant is not part of the SRS client-flow coverage set. |
-| GET | `/api/v1/whatsappOpenEvents/cursor` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | Cursor/list variant not referenced by the SRS flow document. |
 
 ## All Live Routes
 
@@ -230,12 +223,5 @@ Generated on: 2026-04-25T01:54:22.923Z
 | GET | `/api/v1/users/me` | `src/modules/user/user.routes.ts` | Yes |
 | PATCH | `/api/v1/users/me` | `src/modules/user/user.routes.ts` | Yes |
 | POST | `/api/v1/users/me/change-password` | `src/modules/user/user.routes.ts` | Yes |
-| GET | `/api/v1/whatsappOpenEvents` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | Yes |
-| POST | `/api/v1/whatsappOpenEvents` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | Yes |
-| DELETE | `/api/v1/whatsappOpenEvents/:id` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | No |
-| GET | `/api/v1/whatsappOpenEvents/:id` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | Yes |
-| PATCH | `/api/v1/whatsappOpenEvents/:id` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | No |
-| PUT | `/api/v1/whatsappOpenEvents/:id` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | No |
-| GET | `/api/v1/whatsappOpenEvents/cursor` | `src/modules/whatsappOpenEvent/whatsappOpenEvent.routes.ts` | No |
 | GET | `/health` | `src/app.ts` | Yes |
 

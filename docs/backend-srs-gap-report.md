@@ -64,7 +64,6 @@ This review compares the backend in this repository against the requirements in 
 | Furniture | Admin approve/reject furniture booking | Implemented | `PATCH /api/v1/furnitureBookings/:id/review` exists in [furnitureBooking.routes.ts](/home/mk/Projects/freelance/mohand/nada_city/src/modules/furnitureBooking/furnitureBooking.routes.ts:1) | Admin-only review endpoint |
 | Furniture | User special furniture request | Implemented | `POST /api/v1/specialFurnitureRequests` and `GET /api/v1/specialFurnitureRequests/me` exist in [specialFurnitureRequest.routes.ts](/home/mk/Projects/freelance/mohand/nada_city/src/modules/specialFurnitureRequest/specialFurnitureRequest.routes.ts:1) | Ownership-scoped with admin review |
 | Cross-cutting | Favorites | Implemented but extra to SRS | `Favorite` model/routes exist | Useful extra feature not called out in SRS |
-| Cross-cutting | WhatsApp open tracking | Unclear / extra | `WhatsappOpenEvent` model/routes exist | Not clearly specified in reviewed SRS pages; likely an extra analytics feature |
 
 ## Code-Quality and Compliance Notes
 - Soft delete is implemented for content catalogs such as gallery items, units, locations, finishes, and furniture items through `deletedAt`, but request-style modules still hard-delete records.

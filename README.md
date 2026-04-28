@@ -18,7 +18,7 @@ This backend now exposes workflow-specific endpoints for the SRS-critical flows 
 
 ## Models
 
-- **User** -- `11` fields, `10` relations
+- **User** -- `11` fields, `9` relations
 - **OtpToken** -- `6` fields, `0` relations
 - **PasswordResetToken** -- `6` fields, `0` relations
 - **GalleryItem** -- `11` fields, `3` relations
@@ -35,7 +35,6 @@ This backend now exposes workflow-specific endpoints for the SRS-critical flows 
 - **FurnitureBooking** -- `11` fields, `2` relations
 - **SpecialFurnitureRequest** -- `9` fields, `1` relations
 - **Favorite** -- `8` fields, `5` relations
-- **WhatsappOpenEvent** -- `6` fields, `1` relations
 
 ## Quick Start
 
@@ -252,17 +251,6 @@ Once the server is running, visit:
 | PUT | \`/api/favorites/:id\` | Full update |
 | PATCH | \`/api/favorites/:id\` | Partial update |
 | DELETE | \`/api/favorites/:id\` | Delete |
-
-### WhatsappOpenEvent
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | \`/api/whatsappOpenEvents\` | List all |
-| POST | \`/api/whatsappOpenEvents\` | Create |
-| GET | \`/api/whatsappOpenEvents/:id\` | Get by key |
-| PUT | \`/api/whatsappOpenEvents/:id\` | Full update |
-| PATCH | \`/api/whatsappOpenEvents/:id\` | Partial update |
-| DELETE | \`/api/whatsappOpenEvents/:id\` | Delete |
 
 ## Query Parameters
 
