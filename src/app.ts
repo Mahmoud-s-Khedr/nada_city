@@ -30,7 +30,11 @@ import { storageRoutes } from './modules/storage/storage.routes.js';
 const app = express();
 
 // -- Security & Parsing
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: false,
+  originAgentCluster: false,
+}));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: process.env.JSON_LIMIT || '1mb' }));
 app.use(express.urlencoded({ extended: true }));
