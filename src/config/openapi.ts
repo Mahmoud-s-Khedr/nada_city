@@ -318,6 +318,6 @@ export function buildOpenApiDocument() {
       version: '1.0.0',
       description: 'REST API documentation generated from Express routes and Zod schemas.',
     },
-    servers: [{ url: '/', description: 'Current host' }],,
+    servers: [{ url: '/', description: 'Current host' }],
   });
 }
