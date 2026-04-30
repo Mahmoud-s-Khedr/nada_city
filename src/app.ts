@@ -26,6 +26,7 @@ import { specialFurnitureRequestRoutes } from './modules/specialFurnitureRequest
 import { favoriteRoutes } from './modules/favorite/favorite.routes.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { storageRoutes } from './modules/storage/storage.routes.js';
+import { getDependencyStatus, isReady } from './config/health.js';
 
 const app = express();
 
@@ -56,9 +57,13 @@ app.use(pinoHttp({ logger }));
 app.use(rateLimiter);
 
 // -- Health Check
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
+app.get('/health', async (_req, res) => {
+  const dependencies = await getDependencyStatus();
+  const ready = isReady(dependencies);
+  res.status(ready ? 200 : 503).json({
+    status: ready ? 'ok' : 'degraded',
+    ready,
+    dependencies,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });

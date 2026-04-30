@@ -10,6 +10,11 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(3000),
   DATABASE_URL: z.string().url(),
+  POSTGRES_USER: z.string().min(1).optional(),
+  POSTGRES_PASSWORD: z.string().min(1).optional(),
+  POSTGRES_DB: z.string().min(1).optional(),
+  POSTGRES_HOST: z.string().min(1).optional(),
+  POSTGRES_PORT: z.coerce.number().int().positive().optional(),
   JWT_SECRET: z.string().min(32),
   ACCESS_TOKEN_TTL: z.string().default('15m'),
   EXPOSE_TEST_TOKENS: z
@@ -44,5 +49,43 @@ if (!parsed.success) {
   throw new Error(`Invalid environment variables:\n${JSON.stringify(fieldErrors, null, 2)}`);
 }
 
-export const env = parsed.data;
+const data = parsed.data;
+const databaseUrl = new URL(data.DATABASE_URL);
+const dbUsername = decodeURIComponent(databaseUrl.username);
+const dbPassword = decodeURIComponent(databaseUrl.password);
+const dbName = databaseUrl.pathname.replace(/^\//, '');
+const dbHost = databaseUrl.hostname;
+const dbPort = databaseUrl.port ? Number(databaseUrl.port) : 5432;
+
+if (data.POSTGRES_USER && data.POSTGRES_USER !== dbUsername) {
+  throw new Error(
+    `Invalid environment variables:\nPOSTGRES_USER does not match DATABASE_URL username (${data.POSTGRES_USER} !== ${dbUsername}).`
+  );
+}
+
+if (data.POSTGRES_PASSWORD && data.POSTGRES_PASSWORD !== dbPassword) {
+  throw new Error(
+    'Invalid environment variables:\nPOSTGRES_PASSWORD does not match DATABASE_URL password.'
+  );
+}
+
+if (data.POSTGRES_DB && data.POSTGRES_DB !== dbName) {
+  throw new Error(
+    `Invalid environment variables:\nPOSTGRES_DB does not match DATABASE_URL database (${data.POSTGRES_DB} !== ${dbName}).`
+  );
+}
+
+if (data.POSTGRES_HOST && data.POSTGRES_HOST !== dbHost) {
+  throw new Error(
+    `Invalid environment variables:\nPOSTGRES_HOST does not match DATABASE_URL host (${data.POSTGRES_HOST} !== ${dbHost}).`
+  );
+}
+
+if (data.POSTGRES_PORT && data.POSTGRES_PORT !== dbPort) {
+  throw new Error(
+    `Invalid environment variables:\nPOSTGRES_PORT does not match DATABASE_URL port (${data.POSTGRES_PORT} !== ${dbPort}).`
+  );
+}
+
+export const env = data;
 export type Env = z.infer<typeof envSchema>;

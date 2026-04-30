@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:api-harness": "tsx scripts/api-client-harness.ts",
+    "check:db": "tsx scripts/check-db-config.ts",
     "report:unused-apis": "tsx scripts/generate-unused-api-report.ts",
     "migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",

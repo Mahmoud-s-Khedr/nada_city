@@ -46,6 +46,9 @@ pnpm install
 cp .env.example .env
 # Edit .env with your database URL and JWT secret
 
+# Preflight database auth/connectivity
+pnpm check:db
+
 # Run database migrations
 pnpm exec prisma migrate dev --name init
 
@@ -266,6 +269,7 @@ GET /api/resource?page=1&limit=20&sort=createdAt&order=desc&filter[field]=value&
 | \`pnpm build\` | Compile TypeScript |
 | \`pnpm start\` | Start production server |
 | \`pnpm test\` | Run tests |
+| \`pnpm check:db\` | Validate DB env consistency and verify auth/connectivity |
 | \`pnpm migrate\` | Run Prisma migrations |
 | \`pnpm seed\` | Seed the database |
 | \`pnpm studio\` | Open Prisma Studio |
@@ -299,6 +303,10 @@ docker compose down
 docker compose down -v
 \`\`\`
 
+Important: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_HOST`,
+and `POSTGRES_PORT` must stay aligned with `DATABASE_URL` when provided. The stack
+supports local, Docker-network, or remote endpoints; it is not limited to localhost.
+
 Docker startup bootstraps the schema automatically before the server starts.
 If Prisma migration directories already exist, the container runs \`prisma migrate deploy\`.
 If no real migration directories exist yet, it falls back to \`prisma db push\`
@@ -311,6 +319,32 @@ After startup:
 - API: [http://localhost:3000](http://localhost:3000)
 - Swagger UI: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
 - Health check: [http://localhost:3000/health](http://localhost:3000/health)
+
+## Database Drift Runbook
+
+1. Validate env consistency and DB auth:
+   \`\`\`bash
+   pnpm check:db
+   \`\`\`
+2. If Docker is used, confirm effective env values:
+   \`\`\`bash
+   docker compose config | rg "POSTGRES_USER|POSTGRES_PASSWORD|POSTGRES_DB|DATABASE_URL"
+   \`\`\`
+3. If credentials were changed after Postgres volume initialization, pick one recovery path:
+   - Development reset (destructive):
+     \`\`\`bash
+     docker compose down -v
+     docker compose up --build -d
+     \`\`\`
+   - Non-destructive password sync inside DB:
+     \`\`\`bash
+     docker compose exec db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "ALTER USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
+     \`\`\`
+4. Re-run schema bootstrap and verify:
+   \`\`\`bash
+   docker compose logs app --tail 200
+   curl -s http://localhost:3000/health
+   \`\`\`
 
 ## Project Structure
 

@@ -82,7 +82,12 @@ const ProblemDetailSchema = z.object({
 }).openapi('ProblemDetail');
 
 const HealthSchema = z.object({
-  status: z.string().openapi({ example: 'ok' }),
+  status: z.enum(['ok', 'degraded']).openapi({ example: 'ok' }),
+  ready: z.boolean().openapi({ example: true }),
+  dependencies: z.object({
+    db: z.enum(['up', 'down']).openapi({ example: 'up' }),
+    redis: z.enum(['up', 'down']).openapi({ example: 'up' }),
+  }),
   timestamp: z.string().datetime(),
   uptime: z.number(),
 }).openapi('HealthResponse');
@@ -197,6 +202,12 @@ function buildResponsesForMethod(method: HttpMethod) {
     },
     500: {
       description: 'Internal Server Error',
+      content: {
+        'application/json': { schema: ProblemDetailSchema },
+      },
+    },
+    503: {
+      description: 'Service Unavailable',
       content: {
         'application/json': { schema: ProblemDetailSchema },
       },

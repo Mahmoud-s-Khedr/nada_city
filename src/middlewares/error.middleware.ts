@@ -26,6 +26,18 @@ export class ProblemDetail extends Error {
 
 /** Prisma error code to HTTP response mapping */
 const PRISMA_ERROR_MAP: Record<string, { status: number; type: string; title: string; detail: string }> = {
+  P1000: {
+    status: 503,
+    type: 'database-auth-failed',
+    title: 'Database Authentication Failed',
+    detail: 'The database rejected application credentials.',
+  },
+  P1001: {
+    status: 503,
+    type: 'database-unreachable',
+    title: 'Database Unreachable',
+    detail: 'The database server could not be reached.',
+  },
   P2000: { status: 422, type: 'value-too-long', title: 'Value Too Long', detail: 'The provided value is too long for the column.' },
   P2002: { status: 409, type: 'unique-constraint', title: 'Unique Constraint Violation', detail: 'A record with this value already exists.' },
   P2003: { status: 422, type: 'foreign-key-constraint', title: 'Foreign Key Constraint Violation', detail: 'A related record was not found.' },
@@ -90,6 +102,39 @@ export function errorMiddleware(err: Error, req: Request, res: Response, _next: 
         detail,
         instance: req.originalUrl,
         ...(target.length > 0 && { fields: target }),
+      });
+      return;
+    }
+  }
+
+  if (err instanceof Prisma.PrismaClientInitializationError) {
+    const code = err.errorCode;
+    const mapped = code ? PRISMA_ERROR_MAP[code] : undefined;
+    if (mapped) {
+      res.status(mapped.status).json({
+        type: mapped.type,
+        title: mapped.title,
+        status: mapped.status,
+        detail: mapped.detail,
+        instance: req.originalUrl,
+      });
+      return;
+    }
+
+    const detailLower = err.message.toLowerCase();
+    const looksLikeConnectivityIssue = detailLower.includes('authentication failed')
+      || detailLower.includes('connect')
+      || detailLower.includes('timed out')
+      || detailLower.includes('can\'t reach database server')
+      || detailLower.includes('could not connect');
+
+    if (looksLikeConnectivityIssue) {
+      res.status(503).json({
+        type: 'database-unavailable',
+        title: 'Database Unavailable',
+        status: 503,
+        detail: 'The database is temporarily unavailable.',
+        instance: req.originalUrl,
       });
       return;
     }
