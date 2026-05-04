@@ -129,6 +129,8 @@ function buildPathParamsSchema(path: string): ZodObject<any> | undefined {
 
 function buildValidationRequest(
   middlewares: unknown[],
+  method: HttpMethod,
+  fullPath: string,
   pathParamsSchema?: ZodObject<any>
 ) {
   const request: {
@@ -169,6 +171,42 @@ function buildValidationRequest(
         },
       },
     };
+  }
+
+  if (!request.query) {
+    const isGetMethod = method === 'get';
+    const isCursorEndpoint = fullPath.endsWith('/cursor');
+    const hasPathParams = extractPathParamNames(fullPath).length > 0;
+
+    if (isGetMethod && isCursorEndpoint) {
+      request.query = z.object({
+        cursor: z.string().optional(),
+        pageSize: z.coerce.number().int().min(1).max(100).optional(),
+        direction: z.enum(['forward', 'backward']).optional(),
+      });
+    } else if (isGetMethod && hasPathParams) {
+      request.query = z.object({
+        include: z.string().optional().openapi({
+          description: 'Comma-separated relations to include',
+          example: 'location,favorites',
+        }),
+      });
+    } else if (isGetMethod) {
+      request.query = z.object({
+        page: z.coerce.number().int().min(1).optional(),
+        limit: z.coerce.number().int().min(1).max(100).optional(),
+        sort: z.string().optional(),
+        order: z.enum(['asc', 'desc']).optional(),
+        search: z.string().optional(),
+        include: z.string().optional().openapi({
+          description: 'Comma-separated relations to include',
+          example: 'location,favorites',
+        }),
+        filter: z.record(z.string(), z.string()).optional().openapi({
+          description: 'Deep-object filter values, e.g. filter[status]=ACTIVE',
+        }),
+      });
+    }
   }
 
   return Object.keys(request).length > 0 ? request : undefined;
@@ -288,10 +326,10 @@ function registerRouterPaths(registry: OpenAPIRegistry, mounted: MountedRouter):
     const fullPath = toOpenApiPath(joinPaths(mounted.basePath, route.path));
     const pathParamsSchema = buildPathParamsSchema(fullPath);
     const middlewares = (route.stack ?? []).map((stackLayer) => stackLayer.handle);
-    const request = buildValidationRequest(middlewares, pathParamsSchema);
     const usesAuth = middlewares.includes(authenticate as unknown);
 
     for (const method of methods) {
+      const request = buildValidationRequest(middlewares, method, fullPath, pathParamsSchema);
       registry.registerPath({
         method,
         path: fullPath,

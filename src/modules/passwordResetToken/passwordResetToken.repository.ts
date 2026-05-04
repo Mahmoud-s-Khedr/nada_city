@@ -38,7 +38,7 @@ export class PasswordResetTokenRepository {
     return { data, total };
   }
 
-  async findOne(key: PasswordResetTokenKey, include?: Record<string, boolean>): Promise<PasswordResetToken | null> {
+  async findOne(key: PasswordResetTokenKey, _include?: Record<string, boolean>): Promise<PasswordResetToken | null> {
 
     return prisma.passwordResetToken.findUnique({
       where: this.toWhereUnique(key),

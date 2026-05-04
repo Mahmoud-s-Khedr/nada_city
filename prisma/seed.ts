@@ -1329,6 +1329,7 @@ async function generateScalarValue(
   }
 
   const normalized = field.name.toLowerCase();
+  if (normalized === 'deletedat') return null;
 
   if (normalized === 'email' || normalized === 'emailaddress') return faker.internet.email();
   if (normalized === 'name' || normalized === 'fullname' || normalized === 'displayname') return faker.person.fullName();

@@ -160,7 +160,6 @@ describe('GalleryItemRepository', () => {
     });
 
     it('throws ProblemDetail with status 404 on P2025 error', async () => {
-      const prismaError = Object.assign(new Error('Record not found'), { code: 'P2025' });
       delegate.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(repo.update(key, {})).rejects.toMatchObject({ status: 404 });
@@ -178,7 +177,6 @@ describe('GalleryItemRepository', () => {
     });
 
     it('throws ProblemDetail with status 404 on P2025 error', async () => {
-      const prismaError = Object.assign(new Error('Record not found'), { code: 'P2025' });
       delegate.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(repo.delete(key)).rejects.toMatchObject({ status: 404 });

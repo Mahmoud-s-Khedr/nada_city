@@ -500,7 +500,6 @@ async function passwordRecoveryFlow(email: string, _currentPassword: string): Pr
 async function profileFlow(email: string, currentPassword: string): Promise<{ accessToken: string; password: string }> {
   let activePassword = currentPassword;
   let session = await login(email, activePassword);
-  let completed = false;
 
   await runFlow('Profile and Password Management', async () => {
     const me = await api<UserProfile>('GET', '/api/v1/users/me', {
@@ -541,7 +540,6 @@ async function profileFlow(email: string, currentPassword: string): Promise<{ ac
     });
 
     session = await login(email, activePassword);
-    completed = true;
 
     return [
       'GET /users/me returned the authenticated profile',

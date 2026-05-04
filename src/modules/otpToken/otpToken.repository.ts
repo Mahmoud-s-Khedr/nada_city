@@ -38,7 +38,7 @@ export class OtpTokenRepository {
     return { data, total };
   }
 
-  async findOne(key: OtpTokenKey, include?: Record<string, boolean>): Promise<OtpToken | null> {
+  async findOne(key: OtpTokenKey, _include?: Record<string, boolean>): Promise<OtpToken | null> {
 
     return prisma.otpToken.findUnique({
       where: this.toWhereUnique(key),
