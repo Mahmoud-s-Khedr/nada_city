@@ -35,6 +35,28 @@ export interface QueryOptions {
   page: number;
 }
 
+function normalizeBracketFilters(query: Record<string, any>): Record<string, any> {
+  const normalized = { ...query };
+  const filterFromObject = query.filter && typeof query.filter === 'object' && !Array.isArray(query.filter)
+    ? { ...query.filter }
+    : {};
+
+  for (const [key, value] of Object.entries(query)) {
+    const match = /^filter\[([^\]]+)\]$/.exec(key);
+    if (!match) continue;
+    const field = match[1];
+    if (field) {
+      filterFromObject[field] = value;
+    }
+  }
+
+  if (Object.keys(filterFromObject).length > 0) {
+    normalized.filter = filterFromObject;
+  }
+
+  return normalized;
+}
+
 function filterValueError(field: string, expected: string): ProblemDetail {
   return new ProblemDetail({
     type: 'validation-error',
@@ -96,6 +118,7 @@ export function buildQueryOptions(
   query: Record<string, any>,
   config: QueryBuilderConfig = {},
 ): QueryOptions {
+  const normalizedQuery = normalizeBracketFilters(query);
   const {
     allowedFilterFields = [],
     searchableFields = [],
@@ -106,21 +129,21 @@ export function buildQueryOptions(
     softDeleteField,
   } = config;
 
-  const pageRaw = parseInt(String(query.page ?? '1'), 10);
+  const pageRaw = parseInt(String(normalizedQuery.page ?? '1'), 10);
   const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
-  const limitRaw = parseInt(String(query.limit ?? '20'), 10);
+  const limitRaw = parseInt(String(normalizedQuery.limit ?? '20'), 10);
   const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(100, limitRaw) : 20;
   const skip = (page - 1) * limit;
 
   // Sorting — validate sort field against allowed fields; use model fallback when provided.
-  const requestedSort = typeof query.sort === 'string' ? query.sort : undefined;
+  const requestedSort = typeof normalizedQuery.sort === 'string' ? normalizedQuery.sort : undefined;
   let sortField: string | undefined;
   if (requestedSort && allowedFilterFields.includes(requestedSort)) {
     sortField = requestedSort;
   } else if (defaultSortField && allowedFilterFields.includes(defaultSortField)) {
     sortField = defaultSortField;
   }
-  const order = query.order === 'asc' ? 'asc' : 'desc';
+  const order = normalizedQuery.order === 'asc' ? 'asc' : 'desc';
   const orderBy = sortField ? { [sortField]: order } : undefined;
 
   // Filtering — only allow known fields, parse by field type
@@ -128,8 +151,8 @@ export function buildQueryOptions(
   if (softDeleteField) {
     where[softDeleteField] = null;
   }
-  if (query.filter && typeof query.filter === 'object' && !Array.isArray(query.filter)) {
-    for (const [key, value] of Object.entries(query.filter)) {
+  if (normalizedQuery.filter && typeof normalizedQuery.filter === 'object' && !Array.isArray(normalizedQuery.filter)) {
+    for (const [key, value] of Object.entries(normalizedQuery.filter)) {
       if (allowedFilterFields.length > 0 && !allowedFilterFields.includes(key)) {
         continue;
       }
@@ -139,8 +162,8 @@ export function buildQueryOptions(
   }
 
   // Full-text search across searchable fields
-  if (query.search && typeof query.search === 'string' && searchableFields.length > 0) {
-    const searchTerm = query.search;
+  if (normalizedQuery.search && typeof normalizedQuery.search === 'string' && searchableFields.length > 0) {
+    const searchTerm = normalizedQuery.search;
     const searchConditions = searchableFields.map((field) => ({
 
       [field]: { contains: searchTerm, mode: 'insensitive' as const },
@@ -151,8 +174,8 @@ export function buildQueryOptions(
 
   // Includes
   let include: Record<string, boolean> | undefined;
-  if (query.include !== undefined) {
-    const relations = String(query.include)
+  if (normalizedQuery.include !== undefined) {
+    const relations = String(normalizedQuery.include)
       .split(',')
       .map((r: string) => r.trim())
       .filter(Boolean);

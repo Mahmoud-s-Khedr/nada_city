@@ -55,11 +55,17 @@ type EntityWithId = {
   id: string;
 };
 
-const baseUrl = (process.env.BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+const baseUrl = (process.env.BASE_URL ?? 'http://159.65.120.18:3000').replace(/\/$/, '');
 const failFast = (process.env.API_TEST_FAIL_FAST ?? 'false') === 'true';
 const jsonSummary = (process.env.API_TEST_JSON_SUMMARY ?? 'false') === 'true';
-const adminEmail = process.env.API_TEST_ADMIN_EMAIL ?? process.env.ADMIN_EMAIL;
-const adminPassword = process.env.API_TEST_ADMIN_PASSWORD ?? process.env.ADMIN_PASSWORD;
+const adminEmail = process.env.API_TEST_ADMIN_EMAIL
+  ?? process.env.ADMIN_EMAIL
+  ?? process.env.ADMIN_SEED_EMAIL
+  ?? 'seed-admin@example.com';
+const adminPassword = process.env.API_TEST_ADMIN_PASSWORD
+  ?? process.env.ADMIN_PASSWORD
+  ?? process.env.ADMIN_SEED_PASSWORD
+  ?? 'AdminPassword123!';
 const runId = crypto.randomUUID().slice(0, 8);
 const runTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
 const logDir = process.env.API_TEST_LOG_DIR ?? 'logs';
@@ -553,6 +559,10 @@ async function profileFlow(email: string, currentPassword: string): Promise<{ ac
 
 async function galleryFlow(userToken: string): Promise<void> {
   const admin = await getAdminTokens();
+  if (!admin) {
+    log('  ! Admin credentials not available; skipping gallery flow.');
+    return;
+  }
 
   await runFlow('Gallery, Comments, Reactions, and Favorites', async () => {
     const galleryRead = await request<ApiEnvelope<JsonObject[]>>('GET', '/api/v1/galleryItems', {
@@ -756,6 +766,10 @@ async function bookingFlow(userToken: string): Promise<{ locationId: string; uni
 
 async function sellUnitFlow(userToken: string, locationId: string): Promise<void> {
   const admin = await getAdminTokens();
+  if (!admin) {
+    log('  ! Admin credentials not available; skipping sell-unit flow.');
+    return;
+  }
 
   await runFlow('Sell Unit Requests', async () => {
     const cancellable = await api<EntityWithId>('POST', '/api/v1/sellUnitRequests', {
@@ -836,6 +850,10 @@ async function sellUnitFlow(userToken: string, locationId: string): Promise<void
 
 async function unitOrderFlow(userToken: string): Promise<void> {
   const admin = await getAdminTokens();
+  if (!admin) {
+    log('  ! Admin credentials not available; skipping unit-order flow.');
+    return;
+  }
 
   await runFlow('Unit Order Requests', async () => {
     const cancellable = await api<EntityWithId>('POST', '/api/v1/unitOrderRequests', {
@@ -909,6 +927,10 @@ async function unitOrderFlow(userToken: string): Promise<void> {
 
 async function finishFlow(userToken: string): Promise<void> {
   const admin = await getAdminTokens();
+  if (!admin) {
+    log('  ! Admin credentials not available; skipping finish flow.');
+    return;
+  }
 
   await runFlow('Finishes and Finish Requests', async () => {
     const managed = await createFinish(admin.accessToken, `finish-${runId}`);
@@ -1009,6 +1031,10 @@ async function finishFlow(userToken: string): Promise<void> {
 
 async function furnitureFlow(userToken: string): Promise<void> {
   const admin = await getAdminTokens();
+  if (!admin) {
+    log('  ! Admin credentials not available; skipping furniture flow.');
+    return;
+  }
 
   await runFlow('Furniture Catalog and Bookings', async () => {
     const managed = await createFurnitureItem(admin.accessToken, `furniture-${runId}`);
@@ -1107,6 +1133,10 @@ async function furnitureFlow(userToken: string): Promise<void> {
 
 async function specialFurnitureFlow(userToken: string): Promise<void> {
   const admin = await getAdminTokens();
+  if (!admin) {
+    log('  ! Admin credentials not available; skipping special-furniture flow.');
+    return;
+  }
 
   await runFlow('Special Furniture Requests', async () => {
     const cancellable = await api<EntityWithId>('POST', '/api/v1/specialFurnitureRequests', {

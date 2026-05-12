@@ -29,6 +29,7 @@ import { storageRoutes } from './modules/storage/storage.routes.js';
 import { getDependencyStatus, isReady } from './config/health.js';
 
 const app = express();
+app.set('query parser', 'extended');
 
 // -- Security & Parsing
 app.use(helmet({

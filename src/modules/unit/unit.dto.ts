@@ -87,12 +87,7 @@ export const Unit_BookingsRelationSchema = z.object({
 
 export const Unit_FavoritesRelationSchema = z.object({
   id: z.string().optional(),
-  userId: z.string(),
   type: FavoriteTypeSchema,
-  galleryItemId: z.string().nullish(),
-  unitId: z.string().nullish(),
-  finishId: z.string().nullish(),
-  furnitureItemId: z.string().nullish(),
   createdAt: z.coerce.date().optional(),
 });
 

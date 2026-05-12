@@ -135,6 +135,59 @@ describe('Unit API', () => {
       expect(modelDelegate.findMany).toHaveBeenCalledTimes(1);
       expect(modelDelegate.count).toHaveBeenCalledTimes(1);
     });
+
+    it('applies bracket-style filters like filter[locationId]', async () => {
+      modelDelegate.findMany.mockResolvedValue([mockRecord()]);
+      modelDelegate.count.mockResolvedValue(1);
+
+      const requestBuilder = request(app)
+        .get(basePath)
+        .query({ 'filter[locationId]': 'loc-123' });
+      requestBuilder.set('Authorization', `Bearer ${authToken}`);
+      const response = await requestBuilder;
+
+      expect(response.status).toBe(200);
+      expect(modelDelegate.findMany).toHaveBeenCalledTimes(1);
+      const firstCall = modelDelegate.findMany.mock.calls[0]?.[0] as Record<string, any>;
+      expect(firstCall.where).toMatchObject({
+        deletedAt: null,
+        locationId: { contains: 'loc-123', mode: 'insensitive' },
+        availability: 'AVAILABLE',
+      });
+    });
+
+    it('redacts sensitive favorites fields when include=favorites is requested', async () => {
+      modelDelegate.findMany.mockResolvedValue([mockRecord({
+        favorites: [{
+          id: 'fav-1',
+          userId: 'user-secret',
+          type: 'UNIT',
+          galleryItemId: 'gallery-1',
+          unitId: 'unit-1',
+          finishId: 'finish-1',
+          furnitureItemId: 'furniture-1',
+          createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
+        }],
+      })]);
+      modelDelegate.count.mockResolvedValue(1);
+
+      const requestBuilder = request(app)
+        .get(basePath)
+        .query({ include: 'favorites' });
+      requestBuilder.set('Authorization', `Bearer ${authToken}`);
+      const response = await requestBuilder;
+
+      expect(response.status).toBe(200);
+      expect(response.body.data?.[0]?.favorites?.[0]).toMatchObject({
+        id: 'fav-1',
+        type: 'UNIT',
+      });
+      expect(response.body.data?.[0]?.favorites?.[0]).not.toHaveProperty('userId');
+      expect(response.body.data?.[0]?.favorites?.[0]).not.toHaveProperty('galleryItemId');
+      expect(response.body.data?.[0]?.favorites?.[0]).not.toHaveProperty('unitId');
+      expect(response.body.data?.[0]?.favorites?.[0]).not.toHaveProperty('finishId');
+      expect(response.body.data?.[0]?.favorites?.[0]).not.toHaveProperty('furnitureItemId');
+    });
   });
 
   describe('POST ' + basePath, () => {
