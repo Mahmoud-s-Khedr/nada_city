@@ -29,11 +29,11 @@ router.post(
   async (req, res, next) => {
     try {
       const { filename, contentType, operation } = req.body as z.infer<typeof PresignedUrlRequestSchema>;
-      const key = sanitizeFilename(filename);
+      const key = operation === 'put' ? sanitizeFilename(filename) : filename;
       const result = await generatePresignedUrl({
         key,
         operation,
-        contentType,
+        contentType: operation === 'put' ? contentType : undefined,
       });
       sendSuccess(res, result);
     } catch (error) {

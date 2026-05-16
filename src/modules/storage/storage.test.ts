@@ -62,23 +62,21 @@ describe('storage routes', () => {
 
     it('returns a presigned GET URL when requested', async () => {
       const { generatePresignedUrl } = await import('./storage.service.js');
+      const existingKey = 'get_abc123.txt';
       vi.mocked(generatePresignedUrl).mockResolvedValueOnce({
-        url: 'http://minio:9000/test-bucket/get_abc123.txt',
-        key: 'get_abc123.txt',
+        url: `http://minio:9000/test-bucket/${existingKey}`,
+        key: existingKey,
         expiresIn: 300,
       });
 
       const res = await request(app)
         .post('/api/v1/storage/presigned-url')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ filename: 'get.txt', operation: 'get' });
+        .send({ filename: existingKey, operation: 'get' });
 
       expect(res.status).toBe(200);
       expect(generatePresignedUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          key: expect.stringMatching(/^get_[a-f0-9]{16}\.txt$/),
-          operation: 'get',
-        }),
+        expect.objectContaining({ key: existingKey, operation: 'get', contentType: undefined }),
       );
     });
 
