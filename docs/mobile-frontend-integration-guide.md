@@ -113,7 +113,7 @@ Legend:
 
 | Endpoint | Auth | Request Body | Path/Query | Success | Common Errors | Usage |
 |---|---|---|---|---|---|---|
-| `POST /presigned-url` | Bearer user/admin | `filename*`, `contentType?`, `operation?` (`put`/`get`) | - | `200 {data:{url,key,method,...}}` | `401`, `422`, `500` | Request signed upload/download URL before direct object storage access. |
+| `POST /presigned-url` | Bearer user/admin | `filename*`, `contentType?`, `operation?` (`put`/`get`) | - | `200 {data:{url,get_url,key,expiresIn}}` | `401`, `422`, `500` | Request signed upload/download URL plus stable public object URL. |
 
 ---
 

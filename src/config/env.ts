@@ -32,6 +32,7 @@ const envSchema = z.object({
   S3_ACCESS_KEY_ID: z.string().default('minioadmin'),
   S3_SECRET_ACCESS_KEY: z.string().default('minioadmin'),
   S3_BUCKET: z.string().default('nada-city-uploads'),
+  S3_PUBLIC_BASE_URL: z.string().url().optional(),
   S3_FORCE_PATH_STYLE: z
     .enum(['true', 'false'])
     .default('false')
@@ -40,7 +41,10 @@ const envSchema = z.object({
   // Resend email (production only)
   RESEND_API_KEY: z.string().optional(),
   FROM_EMAIL: z.string().email().default('noreply@nada.city'),
-});
+}).transform((data) => ({
+  ...data,
+  S3_PUBLIC_BASE_URL: data.S3_PUBLIC_BASE_URL ?? `http://159.65.120.18:9000/${data.S3_BUCKET}`,
+}));
 
 const parsed = envSchema.safeParse(process.env);
 

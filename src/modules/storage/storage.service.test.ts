@@ -8,6 +8,7 @@ vi.mock('../../config/env.js', () => ({
     S3_ACCESS_KEY_ID: 'test-access-key',
     S3_SECRET_ACCESS_KEY: 'test-secret-key',
     S3_BUCKET: 'test-bucket',
+    S3_PUBLIC_BASE_URL: 'https://cdn.example.com/test-bucket/',
     S3_FORCE_PATH_STYLE: true,
   },
 }));
@@ -48,6 +49,7 @@ describe('storage.service', () => {
       });
 
       expect(result.url).toBe('https://example.com/presigned-url');
+      expect(result.get_url).toBe('https://cdn.example.com/test-bucket/test-file.txt');
       expect(result.key).toBe('test-file.txt');
       expect(result.expiresIn).toBe(300);
       expect(getSignedUrl).toHaveBeenCalledWith(
@@ -67,6 +69,7 @@ describe('storage.service', () => {
       });
 
       expect(result.url).toBe('https://example.com/presigned-url');
+      expect(result.get_url).toBe('https://cdn.example.com/test-bucket/image.png');
       expect(result.key).toBe('image.png');
       expect(result.expiresIn).toBe(600);
       expect(getSignedUrl).toHaveBeenCalledWith(
@@ -84,6 +87,7 @@ describe('storage.service', () => {
       });
 
       expect(result.url).toBe('https://example.com/presigned-url');
+      expect(result.get_url).toBe('https://cdn.example.com/test-bucket/existing-file.pdf');
       expect(result.key).toBe('existing-file.pdf');
       expect(getSignedUrl).toHaveBeenCalledWith(
         expect.anything(),
@@ -105,6 +109,15 @@ describe('storage.service', () => {
         expect.anything(),
         { expiresIn: 3600 },
       );
+    });
+
+    it('encodes special characters in get_url key segments', async () => {
+      const result = await generatePresignedUrl({
+        key: 'folder/image name.png',
+        operation: 'get',
+      });
+
+      expect(result.get_url).toBe('https://cdn.example.com/test-bucket/folder/image%20name.png');
     });
   });
 });

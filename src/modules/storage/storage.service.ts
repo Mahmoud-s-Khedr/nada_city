@@ -29,8 +29,18 @@ export interface PresignedUrlOptions {
 
 export interface PresignedUrlResult {
   url: string;
+  get_url: string;
   key: string;
   expiresIn: number;
+}
+
+function buildPublicObjectUrl(baseUrl: string, key: string): string {
+  const normalizedBase = baseUrl.replace(/\/+$/, '');
+  const encodedKey = key
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+  return `${normalizedBase}/${encodedKey}`;
 }
 
 export async function generatePresignedUrl(
@@ -61,5 +71,6 @@ export async function generatePresignedUrl(
     'Generated presigned S3 URL',
   );
 
-  return { url, key: options.key, expiresIn };
+  const get_url = buildPublicObjectUrl(env.S3_PUBLIC_BASE_URL, options.key);
+  return { url, get_url, key: options.key, expiresIn };
 }

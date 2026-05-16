@@ -8,6 +8,7 @@ export const PresignedUrlRequestSchema = z.object({
 
 export const PresignedUrlResponseSchema = z.object({
   url: z.string(),
+  get_url: z.string().url(),
   key: z.string(),
   expiresIn: z.number(),
 }).strict();

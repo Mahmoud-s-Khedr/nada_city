@@ -39,6 +39,7 @@ describe('storage routes', () => {
       const { generatePresignedUrl } = await import('./storage.service.js');
       vi.mocked(generatePresignedUrl).mockImplementation(async (opts) => ({
         url: `http://minio:9000/test-bucket/${opts.key}?X-Amz-Algorithm=AWS4-HMAC-SHA256`,
+        get_url: `http://cdn.test/test-bucket/${opts.key}`,
         key: opts.key,
         expiresIn: 300,
       }));
@@ -50,6 +51,7 @@ describe('storage routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.url).toContain('test-bucket');
+      expect(res.body.data.get_url).toMatch(/^http:\/\/cdn\.test\/test-bucket\/test_[a-f0-9]{16}\.txt$/);
       expect(res.body.data.key).toMatch(/^test_[a-f0-9]{16}\.txt$/);
       expect(res.body.data.expiresIn).toBe(300);
       expect(generatePresignedUrl).toHaveBeenCalledWith(
@@ -65,6 +67,7 @@ describe('storage routes', () => {
       const existingKey = 'get_abc123.txt';
       vi.mocked(generatePresignedUrl).mockResolvedValueOnce({
         url: `http://minio:9000/test-bucket/${existingKey}`,
+        get_url: `http://cdn.test/test-bucket/${existingKey}`,
         key: existingKey,
         expiresIn: 300,
       });
@@ -84,6 +87,7 @@ describe('storage routes', () => {
       const { generatePresignedUrl } = await import('./storage.service.js');
       vi.mocked(generatePresignedUrl).mockResolvedValueOnce({
         url: 'http://minio:9000/test-bucket/img.png',
+        get_url: 'http://cdn.test/test-bucket/img.png',
         key: 'img.png',
         expiresIn: 300,
       });
