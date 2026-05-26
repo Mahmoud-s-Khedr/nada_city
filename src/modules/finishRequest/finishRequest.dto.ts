@@ -41,7 +41,7 @@ export const FinishRequest_FinishInput = z.object({
   create: z.object({
     title: z.string(),
     description: z.string(),
-    price: z.number(),
+    price: z.number().optional(),
     type: FinishTypeSchema,
     subType: z.string(),
     imageUrls: z.array(z.string()).optional(),
@@ -113,7 +113,7 @@ export const FinishRequest_FinishRelationSchema = z.object({
   id: z.string().optional(),
   title: z.string(),
   description: z.string(),
-  price: decimalNumberSchema,
+  price: decimalNumberSchema.nullable(),
   type: FinishTypeSchema,
   subType: z.string(),
   imageUrls: z.array(z.string()).optional(),

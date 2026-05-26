@@ -40,7 +40,7 @@ export const Location_UnitsRelationSchema = z.object({
   title: z.string(),
   description: z.string(),
   keywords: z.string().nullish(),
-  price: decimalNumberSchema,
+  price: decimalNumberSchema.nullable(),
   availability: UnitAvailabilitySchema.optional(),
   type: UnitTypeSchema,
   imageUrls: z.array(z.string()).optional(),

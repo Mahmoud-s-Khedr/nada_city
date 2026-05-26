@@ -20,7 +20,7 @@ export const FavoriteTypeSchema = z.enum(['GALLERY_ITEM', 'UNIT', 'FINISH', 'FUR
 export const CreateFurnitureItemSchema = z.object({
   title: z.string(),
   description: z.string(),
-  price: z.number(),
+  price: z.number().optional(),
   imageUrls: z.array(z.string()).optional(),
   videoUrls: z.array(z.string()).optional(),
 });
@@ -71,7 +71,7 @@ export const FurnitureItemResponseSchema = z.object({
   id: z.string().optional(),
   title: z.string(),
   description: z.string(),
-  price: decimalNumberSchema,
+  price: decimalNumberSchema.nullable(),
   imageUrls: z.array(z.string()).optional(),
   videoUrls: z.array(z.string()).optional(),
   deletedAt: z.coerce.date().nullish(),

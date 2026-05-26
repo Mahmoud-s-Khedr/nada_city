@@ -22,7 +22,7 @@ export const FavoriteTypeSchema = z.enum(['GALLERY_ITEM', 'UNIT', 'FINISH', 'FUR
 export const CreateFinishSchema = z.object({
   title: z.string(),
   description: z.string(),
-  price: z.number(),
+  price: z.number().optional(),
   type: FinishTypeSchema,
   subType: z.string(),
   imageUrls: z.array(z.string()).optional(),
@@ -75,7 +75,7 @@ export const FinishResponseSchema = z.object({
   id: z.string().optional(),
   title: z.string(),
   description: z.string(),
-  price: decimalNumberSchema,
+  price: decimalNumberSchema.nullable(),
   type: FinishTypeSchema,
   subType: z.string(),
   imageUrls: z.array(z.string()).optional(),

@@ -93,7 +93,7 @@ export const User_SellUnitRequestsRelationSchema = z.object({
   userId: z.string(),
   title: z.string(),
   description: z.string(),
-  price: decimalNumberSchema,
+  price: decimalNumberSchema.nullable(),
   type: UnitTypeSchema,
   address: z.string(),
   locationId: z.string().nullish(),

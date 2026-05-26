@@ -178,7 +178,7 @@ model Unit {
   description String
   keywords String?
 
-  price        Decimal
+  price        Decimal?
   availability UnitAvailability @default(AVAILABLE)
   type         UnitType
 
@@ -235,7 +235,7 @@ model SellUnitRequest {
   title String
   description String
 
-  price Decimal
+  price Decimal?
   type  UnitType
   address String
 
@@ -287,7 +287,7 @@ model Finish {
   title String
   description String
 
-  price Decimal
+  price Decimal?
   type  FinishType
   subType String
 
@@ -335,7 +335,7 @@ model FurnitureItem {
   title String
   description String
 
-  price Decimal
+  price Decimal?
 
   imageUrls String[] @default([])
   videoUrls String[] @default([])
