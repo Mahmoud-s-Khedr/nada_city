@@ -65,6 +65,16 @@ Once the server is running, visit:
 
 - **Swagger UI**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
 - **Health Check**: [http://localhost:3000/health](http://localhost:3000/health)
+- **Liveness Check**: [http://localhost:3000/live](http://localhost:3000/live)
+- **Readiness Check**: [http://localhost:3000/ready](http://localhost:3000/ready)
+
+## Production Deployment
+
+Production deployment artifacts live here:
+
+- Compose stack: [docker-compose.prod.yml](/home/mk/Projects/freelance/mohand/nada_city/docker-compose.prod.yml)
+- Production env template: [.env.production.example](/home/mk/Projects/freelance/mohand/nada_city/.env.production.example)
+- Deployment runbook: [docs/production-deployment.md](/home/mk/Projects/freelance/mohand/nada_city/docs/production-deployment.md)
 
 ## Available Endpoints
 

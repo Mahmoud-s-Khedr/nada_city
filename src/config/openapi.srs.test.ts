@@ -28,6 +28,8 @@ describe('OpenAPI generation', () => {
     const paths = Object.keys(spec.paths ?? {});
 
     expect(spec.openapi).toBe('3.0.0');
+    expect(spec.paths['/live']).toBeDefined();
+    expect(spec.paths['/ready']).toBeDefined();
     expect(spec.paths['/health']).toBeDefined();
 
     for (const prefix of mountedPrefixes) {
@@ -40,8 +42,9 @@ describe('OpenAPI generation', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.openapi).toBe('3.0.0');
+    expect(res.body.paths?.['/live']).toBeDefined();
+    expect(res.body.paths?.['/ready']).toBeDefined();
     expect(res.body.paths?.['/health']).toBeDefined();
     expect(res.body.components?.securitySchemes?.bearerAuth).toBeDefined();
   });
 });
-

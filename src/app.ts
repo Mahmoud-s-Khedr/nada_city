@@ -57,7 +57,29 @@ app.use(pinoHttp({ logger }));
 // -- Rate Limiting
 app.use(rateLimiter);
 
-// -- Health Check
+// -- Liveness
+app.get('/live', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+// -- Readiness
+app.get('/ready', async (_req, res) => {
+  const dependencies = await getDependencyStatus();
+  const ready = isReady(dependencies);
+  res.status(ready ? 200 : 503).json({
+    status: ready ? 'ok' : 'degraded',
+    ready,
+    dependencies,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+// -- Compatibility health endpoint
 app.get('/health', async (_req, res) => {
   const dependencies = await getDependencyStatus();
   const ready = isReady(dependencies);

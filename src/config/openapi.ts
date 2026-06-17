@@ -92,6 +92,12 @@ const HealthSchema = z.object({
   uptime: z.number(),
 }).openapi('HealthResponse');
 
+const LiveSchema = z.object({
+  status: z.literal('ok').openapi({ example: 'ok' }),
+  timestamp: z.string().datetime(),
+  uptime: z.number(),
+}).openapi('LivenessResponse');
+
 function toOpenApiPath(path: string): string {
   return path.replace(/:([A-Za-z0-9_]+)/g, '{$1}');
 }
@@ -288,13 +294,65 @@ function operationIdFrom(method: HttpMethod, fullPath: string): string {
 function registerHealthRoute(registry: OpenAPIRegistry): void {
   registry.registerPath({
     method: 'get',
+    path: '/live',
+    tags: ['Health'],
+    summary: 'Service liveness check',
+    operationId: 'get_live',
+    responses: {
+      200: {
+        description: 'API process is alive',
+        content: {
+          'application/json': {
+            schema: LiveSchema,
+          },
+        },
+      },
+    },
+  });
+
+  registry.registerPath({
+    method: 'get',
+    path: '/ready',
+    tags: ['Health'],
+    summary: 'Service readiness check',
+    operationId: 'get_ready',
+    responses: {
+      200: {
+        description: 'API is ready to serve traffic',
+        content: {
+          'application/json': {
+            schema: HealthSchema,
+          },
+        },
+      },
+      503: {
+        description: 'API dependencies are unavailable',
+        content: {
+          'application/json': {
+            schema: HealthSchema,
+          },
+        },
+      },
+    },
+  });
+
+  registry.registerPath({
+    method: 'get',
     path: '/health',
     tags: ['Health'],
-    summary: 'Service health check',
+    summary: 'Compatibility health check',
     operationId: 'get_health',
     responses: {
       200: {
-        description: 'API is healthy',
+        description: 'API is ready to serve traffic',
+        content: {
+          'application/json': {
+            schema: HealthSchema,
+          },
+        },
+      },
+      503: {
+        description: 'API dependencies are unavailable',
         content: {
           'application/json': {
             schema: HealthSchema,

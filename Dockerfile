@@ -41,6 +41,6 @@ RUN chmod +x /app/docker-entrypoint.sh
 USER appuser
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:3000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 CMD wget -qO- http://localhost:3000/live || exit 1
 
 CMD ["./docker-entrypoint.sh"]
