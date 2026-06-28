@@ -15,6 +15,8 @@ export function getS3Client(): S3Client {
         secretAccessKey: env.S3_SECRET_ACCESS_KEY,
       },
       forcePathStyle: env.S3_FORCE_PATH_STYLE,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     });
   }
   return _client;

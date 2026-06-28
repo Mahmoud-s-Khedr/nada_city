@@ -33,10 +33,22 @@ describe('storage.service', () => {
   });
 
   describe('getS3Client', () => {
-    it('returns a singleton S3Client instance', () => {
+    it('returns a singleton S3Client instance', async () => {
+      const { S3Client } = await import('@aws-sdk/client-s3');
       const client1 = getS3Client();
       const client2 = getS3Client();
       expect(client1).toBe(client2);
+      expect(S3Client).toHaveBeenCalledWith({
+        endpoint: 'http://localhost:9000',
+        region: 'us-east-1',
+        credentials: {
+          accessKeyId: 'test-access-key',
+          secretAccessKey: 'test-secret-key',
+        },
+        forcePathStyle: true,
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+        responseChecksumValidation: 'WHEN_REQUIRED',
+      });
     });
   });
 

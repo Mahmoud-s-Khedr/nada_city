@@ -4,7 +4,7 @@ This deployment keeps these services on the host machine:
 
 - `nginx` as the public reverse proxy and TLS terminator
 - `PostgreSQL`
-- `MinIO`
+- an S3-compatible object store such as `Garage`
 
 Docker Compose runs:
 
@@ -18,8 +18,8 @@ Docker Compose runs:
 - Docker Engine with Compose plugin
 - Host `nginx`
 - Host `PostgreSQL` reachable from Docker containers
-- Host `MinIO` reachable from Docker containers
-- Open ports for public `nginx`, MinIO, and PostgreSQL as required by your server policy
+- Host object storage reachable from Docker containers
+- Open ports for public `nginx`, object storage, and PostgreSQL as required by your server policy
 
 On Linux, this setup uses `host.docker.internal` mapped through Docker's `host-gateway`.
 
@@ -31,14 +31,15 @@ Important values:
 
 - `DATABASE_URL` must point to host PostgreSQL, for example `host.docker.internal:5432`
 - `REDIS_URL` is injected by Compose and should stay on the internal Docker network
-- `S3_ENDPOINT` must point to host MinIO, for example `http://host.docker.internal:9000`
-- `S3_PUBLIC_BASE_URL` must be the client-facing MinIO or CDN URL
+- `S3_ENDPOINT` must be the client-reachable S3 API URL used for presigned upload/download links, for example `https://s3.example.com`
+- `S3_PUBLIC_BASE_URL` must be the client-facing object URL base, for example `https://files.example.com`
 - `JWT_SECRET` must be a strong random secret
 - `RESEND_API_KEY` and `FROM_EMAIL` are required in production
+- For `Garage`, keep `S3_FORCE_PATH_STYLE=true` and use the checksum compatibility settings built into the app when generating presigned URLs
 
-## 3. Host MinIO bucket bootstrap
+## 3. Host object-storage bucket bootstrap
 
-Create the uploads bucket on the host MinIO server before starting the stack.
+Create the uploads bucket on the host object-storage server before starting the stack.
 
 Example:
 
@@ -47,7 +48,7 @@ mc alias set local http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWOR
 mc mb local/nada-city-uploads --ignore-existing
 ```
 
-If your client uploads depend on public object URLs, also configure the bucket policy and public endpoint to match `S3_PUBLIC_BASE_URL`.
+If your client uploads depend on public object URLs, also configure the bucket policy, DNS, and public endpoint to match `S3_PUBLIC_BASE_URL`.
 
 ## 4. Host Nginx public proxy
 
