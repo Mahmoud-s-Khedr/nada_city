@@ -50,7 +50,7 @@ export async function generatePresignedUrl(
 ): Promise<PresignedUrlResult> {
   const client = getS3Client();
   const bucket = env.S3_BUCKET;
-  const expiresIn = Math.min(options.expiresIn ?? 300, 3600);
+  const expiresIn = 24 * 3600; // 24 hour in seconds
 
   let command;
   if (options.operation === 'put') {
