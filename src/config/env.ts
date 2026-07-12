@@ -24,6 +24,11 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('*'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   RATE_LIMIT_MAX: z.coerce.number().default(100),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().default(20),
+  AUTH_RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
+  REFRESH_RATE_LIMIT_MAX: z.coerce.number().default(30),
+  REFRESH_RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
   REDIS_URL: z.string().default('redis://localhost:6379'),
 
   // S3-compatible storage (R2 in production, MinIO in dev)

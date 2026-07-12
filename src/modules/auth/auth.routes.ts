@@ -16,8 +16,8 @@ import { tokenDeliveryProvider } from './token-delivery.js';
 
 const router = Router();
 
-const authRateLimit = createRouteRateLimit(env.NODE_ENV === 'production' ? 5 : 100, 15 * 60 * 1000);
-const refreshRateLimit = createRouteRateLimit(10, 15 * 60 * 1000);
+const authRateLimit = createRouteRateLimit(env.AUTH_RATE_LIMIT_MAX, env.AUTH_RATE_LIMIT_WINDOW_MS);
+const refreshRateLimit = createRouteRateLimit(env.REFRESH_RATE_LIMIT_MAX, env.REFRESH_RATE_LIMIT_WINDOW_MS);
 
 const REFRESH_TOKEN_TTL = parseInt(process.env.REFRESH_TOKEN_TTL || String(7 * 24 * 60 * 60), 10);
 
