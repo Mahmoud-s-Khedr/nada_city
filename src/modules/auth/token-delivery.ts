@@ -34,7 +34,7 @@ export class ResendTokenDeliveryProvider implements TokenDeliveryProvider {
     const html =
       payload.kind === 'otp'
         ? `<p>Your verification code is: <strong>${payload.token}</strong></p><p>This code expires in 10 minutes.</p>`
-        : `<p>Click the link below to reset your password:</p><p><a href="#">${payload.token}</a></p><p>This link expires in 30 minutes.</p>`;
+        : `<p>Your password reset code is: <strong>${payload.token}</strong></p><p>This code expires in 30 minutes.</p>`;
 
     const { error } = await this.resend.emails.send({
       from: env.FROM_EMAIL,

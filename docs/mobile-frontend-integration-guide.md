@@ -104,8 +104,8 @@ Legend:
 | `POST /login` | Public | `email*`, `password*` | - | `200 {data:{accessToken,refreshToken}}` | `401` invalid creds, `403` unverified account | Start authenticated session. |
 | `POST /refresh` | Public | `refreshToken*` | - | `200 {data:{accessToken,refreshToken}}` | `401` invalid/expired refresh token | Rotate tokens when access token expires. |
 | `POST /logout` | Public | `refreshToken*` | - | `200 {data:{loggedOut:true}}` | `401` invalid refresh token | Invalidate refresh token / sign out. |
-| `POST /forgot-password` | Public | `email*` | - | `200 {data:{sent:true}}` | `404/403` account state issues | Send reset token to user email. |
-| `POST /reset-password` | Public | `token*`, `password*`, `confirmPassword*` | - | `200 {data:{changed:true}}` | `401` invalid/expired token, `422` mismatch/weak password | Reset password with issued token. |
+| `POST /forgot-password` | Public | `email*` | - | `200 {data:{requested:true}}` | `422` invalid email | Send a six-digit password-reset code to the user's email. |
+| `POST /reset-password` | Public | `token*` (six-digit code), `password*`, `confirmPassword*` | - | `200 {data:{reset:true}}` | `401` invalid/expired code, `422` invalid code or mismatch/weak password | Reset password with the emailed six-digit code. |
 
 ---
 

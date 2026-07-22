@@ -175,6 +175,64 @@ describe('SRS remediation', () => {
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
   });
 
+  it('issues a six-digit password reset code for a verified user', async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ id: 'user-1', email: 'user@example.com', isVerified: true });
+    prismaMock.passwordResetToken.create.mockResolvedValue({ id: 'reset-1' });
+
+    const response = await request(app)
+      .post('/api/v1/auth/forgot-password')
+      .send({ email: 'user@example.com' });
+
+    expect(response.status).toBe(200);
+    expect(prismaMock.passwordResetToken.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        email: 'user@example.com',
+        token: expect.stringMatching(/^\d{6}$/),
+      }),
+    });
+  });
+
+  it('rejects reset-password tokens that are not six-digit codes', async () => {
+    const response = await request(app)
+      .post('/api/v1/auth/reset-password')
+      .send({
+        token: '11111',
+        password: 'NewStrong1',
+        confirmPassword: 'NewStrong1',
+      });
+
+    expect(response.status).toBe(422);
+    expect(prismaMock.passwordResetToken.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('resets a password with an unexpired six-digit code and consumes it', async () => {
+    prismaMock.passwordResetToken.findUnique.mockResolvedValue({
+      id: 'reset-1',
+      email: 'user@example.com',
+      consumed: false,
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    });
+    prismaMock.user.findUnique.mockResolvedValue({ id: 'user-1', email: 'user@example.com' });
+    prismaMock.passwordResetToken.update.mockResolvedValue({ id: 'reset-1', consumed: true });
+    prismaMock.user.update.mockResolvedValue({ id: 'user-1' });
+
+    const response = await request(app)
+      .post('/api/v1/auth/reset-password')
+      .send({
+        token: '123456',
+        password: 'NewStrong1',
+        confirmPassword: 'NewStrong1',
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toEqual({ reset: true });
+    expect(prismaMock.passwordResetToken.findUnique).toHaveBeenCalledWith({ where: { token: '123456' } });
+    expect(prismaMock.passwordResetToken.update).toHaveBeenCalledWith({
+      where: { id: 'reset-1' },
+      data: { consumed: true },
+    });
+  });
+
   it('returns the authenticated profile from /users/me', async () => {
     prismaMock.user.findUnique.mockResolvedValue({
       id: 'user-1',

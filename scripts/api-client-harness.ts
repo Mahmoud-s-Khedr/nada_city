@@ -466,6 +466,7 @@ async function passwordRecoveryFlow(email: string, _currentPassword: string): Pr
       forgot.devResetToken,
       'Forgot-password response did not include devResetToken. Start the backend with EXPOSE_TEST_TOKENS=true in a non-production environment and restart it.'
     );
+    assert(/^\d{6}$/.test(forgot.devResetToken), 'Forgot-password did not return a six-digit reset code');
 
     await api<{ changed?: boolean }>('POST', '/api/v1/auth/reset-password', {
       expectedStatus: 200,
@@ -489,8 +490,8 @@ async function passwordRecoveryFlow(email: string, _currentPassword: string): Pr
     changed = true;
 
     return [
-      'Forgot-password returned a dev reset token',
-      'Reset-password consumed the token and blocked reuse',
+      'Forgot-password returned a six-digit dev reset code',
+      'Reset-password consumed the code and blocked reuse',
       'Login with the new password succeeded',
     ];
   });

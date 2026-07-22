@@ -35,6 +35,10 @@ describe('OpenAPI generation', () => {
     for (const prefix of mountedPrefixes) {
       expect(paths.some((path) => path.startsWith(prefix))).toBe(true);
     }
+
+    const resetPasswordSchema = (spec.paths['/api/v1/auth/reset-password'] as any)
+      ?.post?.requestBody?.content?.['application/json']?.schema;
+    expect(resetPasswordSchema?.properties?.token?.pattern).toBe('^\\d{6}$');
   });
 
   it('serves generated OpenAPI JSON from /api/docs.json', async () => {

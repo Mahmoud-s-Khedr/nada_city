@@ -88,7 +88,7 @@ describe('token-delivery', () => {
 
       const { ResendTokenDeliveryProvider: Provider } = await import('./token-delivery.js');
       const provider = new Provider();
-      const payload = { email: 'user@example.com', token: 'reset-token-uuid', kind: 'password-reset' as const };
+      const payload = { email: 'user@example.com', token: '123456', kind: 'password-reset' as const };
 
       await provider.send(payload);
 
@@ -96,7 +96,7 @@ describe('token-delivery', () => {
         from: 'noreply@nada.city',
         to: 'user@example.com',
         subject: 'Password Reset Request',
-        html: expect.stringContaining('reset-token-uuid'),
+        html: expect.stringContaining('password reset code is: <strong>123456</strong>'),
       });
 
       vi.doUnmock('resend');

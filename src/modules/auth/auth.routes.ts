@@ -55,7 +55,7 @@ const ForgotPasswordSchema = z.object({
 }).strict();
 
 const ResetPasswordSchema = z.object({
-  token: z.string().uuid(),
+  token: z.string().regex(/^\d{6}$/, 'Reset code must be exactly six digits'),
   password: z.string().min(8),
   confirmPassword: z.string().min(8),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -65,6 +65,32 @@ const ResetPasswordSchema = z.object({
 
 function createOtpCode(): string {
   return String(randomInt(100000, 1000000));
+}
+
+async function createPasswordResetCode(email: string): Promise<string> {
+  // Codes must remain globally unique because reset-password identifies the
+  // account solely by the submitted code. Retry the exceptionally rare clash.
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const token = createOtpCode();
+    try {
+      await prisma.passwordResetToken.create({
+        data: {
+          email,
+          token,
+          consumed: false,
+          expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+        },
+      });
+      return token;
+    } catch (error) {
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002') {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error('Unable to generate a unique password reset code.');
 }
 
 function withOptionalDevToken<T extends Record<string, unknown>>(
@@ -253,15 +279,7 @@ router.post('/forgot-password', authRateLimit, validate(ForgotPasswordSchema), a
     let resetTokenForResponse: string | undefined;
 
     if (user?.isVerified) {
-      const token = crypto.randomUUID();
-      await prisma.passwordResetToken.create({
-        data: {
-          email,
-          token,
-          consumed: false,
-          expiresAt: new Date(Date.now() + 30 * 60 * 1000),
-        },
-      });
+      const token = await createPasswordResetCode(email);
       await tokenDeliveryProvider.send({ email, token, kind: 'password-reset' });
       resetTokenForResponse = token;
     }

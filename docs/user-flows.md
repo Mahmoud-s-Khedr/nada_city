@@ -74,10 +74,10 @@ User
 
 1. `POST /auth/forgot-password`
    Body: `email`
-   Result: backend creates a reset token for verified users and sends it through the token delivery provider.
+   Result: backend creates a six-digit reset code for verified users and sends it through the token delivery provider.
 2. `POST /auth/reset-password`
-   Body: `token`, `password`, `confirmPassword`
-   Result: backend validates the token, checks password rules, marks the token consumed, and updates the password.
+   Body: `token` (six-digit code), `password`, `confirmPassword`
+   Result: backend validates the code, checks password rules, marks the code consumed, and updates the password.
 3. `POST /auth/login`
    Body: `email`, new `password`
    Result: backend returns `accessToken` and `refreshToken`.
@@ -85,12 +85,12 @@ User
 **Postconditions**
 
 - The old password is replaced.
-- The reset token cannot be reused.
+- The reset code cannot be reused.
 
 **Invalid Sequences**
 
-- Do not call `POST /auth/reset-password` before receiving a valid reset token.
-- Do not reuse a consumed or expired reset token.
+- Do not call `POST /auth/reset-password` before receiving a valid six-digit reset code.
+- Do not reuse a consumed or expired reset code.
 - Do not attempt login with the new password before reset succeeds.
 
 ## 3. Profile and Password Management
