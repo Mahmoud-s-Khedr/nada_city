@@ -94,7 +94,7 @@ export class ReactionController {
   }
 
   /**
-   * GET /api/reactions
+   * GET /api/v1/reactions
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -124,7 +124,7 @@ export class ReactionController {
   }
 
   /**
-   * GET /api/reactions/:id
+   * GET /api/v1/reactions/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -157,7 +157,7 @@ export class ReactionController {
   }
 
   /**
-   * POST /api/reactions
+   * POST /api/v1/reactions
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -169,7 +169,7 @@ export class ReactionController {
   }
 
   /**
-   * PUT /api/reactions/:id
+   * PUT /api/v1/reactions/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -181,7 +181,7 @@ export class ReactionController {
   }
 
   /**
-   * PATCH /api/reactions/:id
+   * PATCH /api/v1/reactions/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -193,7 +193,7 @@ export class ReactionController {
   }
 
   /**
-   * DELETE /api/reactions/:id
+   * DELETE /api/v1/reactions/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

@@ -95,7 +95,7 @@ export class CommentController {
   }
 
   /**
-   * GET /api/comments/cursor
+   * GET /api/v1/comments/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -120,7 +120,7 @@ export class CommentController {
   }
 
   /**
-   * GET /api/comments
+   * GET /api/v1/comments
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -150,7 +150,7 @@ export class CommentController {
   }
 
   /**
-   * GET /api/comments/:id
+   * GET /api/v1/comments/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -183,7 +183,7 @@ export class CommentController {
   }
 
   /**
-   * POST /api/comments
+   * POST /api/v1/comments
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -195,7 +195,7 @@ export class CommentController {
   }
 
   /**
-   * PUT /api/comments/:id
+   * PUT /api/v1/comments/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -207,7 +207,7 @@ export class CommentController {
   }
 
   /**
-   * PATCH /api/comments/:id
+   * PATCH /api/v1/comments/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -219,7 +219,7 @@ export class CommentController {
   }
 
   /**
-   * DELETE /api/comments/:id
+   * DELETE /api/v1/comments/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

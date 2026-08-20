@@ -111,9 +111,7 @@ app.use('/api/v1/furnitureItems', furnitureItemRoutes);
 app.use('/api/v1/furnitureBookings', furnitureBookingRoutes);
 app.use('/api/v1/specialFurnitureRequests', specialFurnitureRequestRoutes);
 app.use('/api/v1/favorites', favoriteRoutes);
-// Account deletion intentionally uses the public path required by App Store
-// review, while the rest of the API remains under /api/v1.
-app.use('/api', accountRoutes);
+app.use('/api/v1', accountRoutes);
 
 // -- Swagger Documentation
 setupSwagger(app);

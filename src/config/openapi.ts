@@ -49,7 +49,7 @@ type MountedRouter = {
 type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
 const mountedRouters: MountedRouter[] = [
-  { basePath: '/api', tag: 'Account', router: accountRoutes as ExpressRouter },
+  { basePath: '/api/v1', tag: 'Account', router: accountRoutes as ExpressRouter },
   { basePath: '/api/v1/auth', tag: 'Auth', router: authRoutes as ExpressRouter },
   { basePath: '/api/v1/storage', tag: 'Storage', router: storageRoutes as ExpressRouter },
   { basePath: '/api/v1/users', tag: 'Users', router: userRoutes as ExpressRouter },

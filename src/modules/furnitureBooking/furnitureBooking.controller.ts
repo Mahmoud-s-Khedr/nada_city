@@ -99,7 +99,7 @@ export class FurnitureBookingController {
   }
 
   /**
-   * GET /api/furnitureBookings/cursor
+   * GET /api/v1/furnitureBookings/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -124,7 +124,7 @@ export class FurnitureBookingController {
   }
 
   /**
-   * GET /api/furnitureBookings
+   * GET /api/v1/furnitureBookings
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -154,7 +154,7 @@ export class FurnitureBookingController {
   }
 
   /**
-   * GET /api/furnitureBookings/:id
+   * GET /api/v1/furnitureBookings/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -187,7 +187,7 @@ export class FurnitureBookingController {
   }
 
   /**
-   * POST /api/furnitureBookings
+   * POST /api/v1/furnitureBookings
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -200,7 +200,7 @@ export class FurnitureBookingController {
   }
 
   /**
-   * PUT /api/furnitureBookings/:id
+   * PUT /api/v1/furnitureBookings/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -212,7 +212,7 @@ export class FurnitureBookingController {
   }
 
   /**
-   * PATCH /api/furnitureBookings/:id
+   * PATCH /api/v1/furnitureBookings/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -224,7 +224,7 @@ export class FurnitureBookingController {
   }
 
   /**
-   * DELETE /api/furnitureBookings/:id
+   * DELETE /api/v1/furnitureBookings/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

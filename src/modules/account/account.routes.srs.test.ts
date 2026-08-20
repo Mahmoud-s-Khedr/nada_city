@@ -52,7 +52,7 @@ function authToken(userId = 'user-1'): string {
   );
 }
 
-describe('DELETE /api/me/account', () => {
+describe('DELETE /api/v1/me/account', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     prismaMock.$transaction.mockImplementation(async (callback: (tx: typeof prismaMock) => unknown) => callback(prismaMock));
@@ -71,7 +71,7 @@ describe('DELETE /api/me/account', () => {
 
   it('returns 401 without a bearer token', async () => {
     const response = await request(app)
-      .delete('/api/me/account')
+      .delete('/api/v1/me/account')
       .send({ confirmation: 'DELETE' });
 
     expect(response.status).toBe(401);
@@ -80,7 +80,7 @@ describe('DELETE /api/me/account', () => {
 
   it('returns 401 for an invalid bearer token', async () => {
     const response = await request(app)
-      .delete('/api/me/account')
+      .delete('/api/v1/me/account')
       .set('Authorization', 'Bearer not-a-jwt')
       .send({ confirmation: 'DELETE' });
 
@@ -91,7 +91,7 @@ describe('DELETE /api/me/account', () => {
     isAccessTokenBlacklistedMock.mockResolvedValue(true);
 
     const response = await request(app)
-      .delete('/api/me/account')
+      .delete('/api/v1/me/account')
       .set('Authorization', `Bearer ${authToken()}`)
       .send({ confirmation: 'DELETE' });
 
@@ -101,7 +101,7 @@ describe('DELETE /api/me/account', () => {
 
   it('rejects a missing or incorrect final confirmation', async () => {
     const response = await request(app)
-      .delete('/api/me/account')
+      .delete('/api/v1/me/account')
       .set('Authorization', `Bearer ${authToken()}`)
       .send({ confirmation: 'delete' });
 
@@ -111,7 +111,7 @@ describe('DELETE /api/me/account', () => {
 
   it('rejects an incorrect password before deleting anything', async () => {
     const response = await request(app)
-      .delete('/api/me/account')
+      .delete('/api/v1/me/account')
       .set('Authorization', `Bearer ${authToken()}`)
       .send({ confirmation: 'DELETE', password: 'wrong-password' });
 
@@ -121,7 +121,7 @@ describe('DELETE /api/me/account', () => {
 
   it('deletes only the authenticated account and its owned data', async () => {
     const response = await request(app)
-      .delete('/api/me/account?userId=user-2')
+      .delete('/api/v1/me/account?userId=user-2')
       .set('Authorization', `Bearer ${authToken('user-1')}`)
       .send({ confirmation: 'DELETE', password: 'correct-password' });
 

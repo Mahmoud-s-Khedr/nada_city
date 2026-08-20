@@ -99,7 +99,7 @@ export class GalleryItemController {
   }
 
   /**
-   * GET /api/galleryItems/cursor
+   * GET /api/v1/galleryItems/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -124,7 +124,7 @@ export class GalleryItemController {
   }
 
   /**
-   * GET /api/galleryItems
+   * GET /api/v1/galleryItems
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -155,7 +155,7 @@ export class GalleryItemController {
   }
 
   /**
-   * GET /api/galleryItems/:id
+   * GET /api/v1/galleryItems/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -188,7 +188,7 @@ export class GalleryItemController {
   }
 
   /**
-   * POST /api/galleryItems
+   * POST /api/v1/galleryItems
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -201,7 +201,7 @@ export class GalleryItemController {
   }
 
   /**
-   * PUT /api/galleryItems/:id
+   * PUT /api/v1/galleryItems/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -213,7 +213,7 @@ export class GalleryItemController {
   }
 
   /**
-   * PATCH /api/galleryItems/:id
+   * PATCH /api/v1/galleryItems/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -225,7 +225,7 @@ export class GalleryItemController {
   }
 
   /**
-   * DELETE /api/galleryItems/:id
+   * DELETE /api/v1/galleryItems/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

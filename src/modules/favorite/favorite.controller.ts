@@ -97,7 +97,7 @@ export class FavoriteController {
   }
 
   /**
-   * GET /api/favorites
+   * GET /api/v1/favorites
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -127,7 +127,7 @@ export class FavoriteController {
   }
 
   /**
-   * GET /api/favorites/:id
+   * GET /api/v1/favorites/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -160,7 +160,7 @@ export class FavoriteController {
   }
 
   /**
-   * POST /api/favorites
+   * POST /api/v1/favorites
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -172,7 +172,7 @@ export class FavoriteController {
   }
 
   /**
-   * PUT /api/favorites/:id
+   * PUT /api/v1/favorites/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -184,7 +184,7 @@ export class FavoriteController {
   }
 
   /**
-   * PATCH /api/favorites/:id
+   * PATCH /api/v1/favorites/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -196,7 +196,7 @@ export class FavoriteController {
   }
 
   /**
-   * DELETE /api/favorites/:id
+   * DELETE /api/v1/favorites/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

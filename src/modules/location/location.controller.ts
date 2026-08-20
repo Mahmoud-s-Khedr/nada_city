@@ -95,7 +95,7 @@ export class LocationController {
   }
 
   /**
-   * GET /api/locations
+   * GET /api/v1/locations
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -126,7 +126,7 @@ export class LocationController {
   }
 
   /**
-   * GET /api/locations/:id
+   * GET /api/v1/locations/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -159,7 +159,7 @@ export class LocationController {
   }
 
   /**
-   * POST /api/locations
+   * POST /api/v1/locations
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -172,7 +172,7 @@ export class LocationController {
   }
 
   /**
-   * PUT /api/locations/:id
+   * PUT /api/v1/locations/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -184,7 +184,7 @@ export class LocationController {
   }
 
   /**
-   * PATCH /api/locations/:id
+   * PATCH /api/v1/locations/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -196,7 +196,7 @@ export class LocationController {
   }
 
   /**
-   * DELETE /api/locations/:id
+   * DELETE /api/v1/locations/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

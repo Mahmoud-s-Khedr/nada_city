@@ -2,7 +2,7 @@
 
 This guide is the integration source of truth for web/mobile clients.
 
-- Base URL prefix: `/api/v1` (account deletion is the intentional exception at `/api/me/account`.)
+- Base URL prefix: `/api/v1`.
 - Primary source order used: mounted routes (`src/app.ts`) -> route validation schemas/DTOs -> runtime response helpers/middleware -> generated OpenAPI (`nada-city-api.json`)
 - Important: some OpenAPI responses are generic; clients should follow **runtime response envelopes** described below.
 
@@ -77,7 +77,7 @@ Recommended flow:
 2. Require a final confirmation in the app. The confirmation request is:
 
 ```http
-DELETE /api/me/account
+DELETE /api/v1/me/account
 Authorization: Bearer <accessToken>
 Content-Type: application/json
 ```
@@ -149,7 +149,7 @@ Legend:
 | `PATCH /me` | Bearer user/admin | `name?`, `phone?`, `address?` | - | `200 {data:{...user}}` | `401`, `422` | Update profile fields. |
 | `POST /me/change-password` | Bearer user/admin | `oldPassword*`, `newPassword*`, `confirmPassword*` | - | `200 {data:{changed:true}}` | `401` wrong old password, `422` validation | Change password from authenticated session. |
 
-## Account deletion (`/api`) [Client]
+## Account deletion (`/api/v1`) [Client]
 
 | Endpoint | Auth | Request Body | Path/Query | Success | Common Errors | Usage |
 |---|---|---|---|---|---|---|

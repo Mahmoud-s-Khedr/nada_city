@@ -99,7 +99,7 @@ export class FinishController {
   }
 
   /**
-   * GET /api/finishes/cursor
+   * GET /api/v1/finishes/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -124,7 +124,7 @@ export class FinishController {
   }
 
   /**
-   * GET /api/finishes
+   * GET /api/v1/finishes
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -155,7 +155,7 @@ export class FinishController {
   }
 
   /**
-   * GET /api/finishes/:id
+   * GET /api/v1/finishes/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -188,7 +188,7 @@ export class FinishController {
   }
 
   /**
-   * POST /api/finishes
+   * POST /api/v1/finishes
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -201,7 +201,7 @@ export class FinishController {
   }
 
   /**
-   * PUT /api/finishes/:id
+   * PUT /api/v1/finishes/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -213,7 +213,7 @@ export class FinishController {
   }
 
   /**
-   * PATCH /api/finishes/:id
+   * PATCH /api/v1/finishes/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -225,7 +225,7 @@ export class FinishController {
   }
 
   /**
-   * DELETE /api/finishes/:id
+   * DELETE /api/v1/finishes/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

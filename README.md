@@ -10,7 +10,7 @@ This backend now exposes workflow-specific endpoints for the SRS-critical flows 
 
 - Auth: `/api/v1/auth/register`, `/api/v1/auth/verify-otp`, `/api/v1/auth/login`, `/api/v1/auth/forgot-password`, `/api/v1/auth/reset-password`, `/api/v1/auth/refresh`, `/api/v1/auth/logout`
 - Profile: `/api/v1/users/me`, `PATCH /api/v1/users/me`, `/api/v1/users/me/change-password`
-- Account deletion: `DELETE /api/me/account` (requires in-app `DELETE` confirmation; clears account data and session tokens)
+- Account deletion: `DELETE /api/v1/me/account` (requires in-app `DELETE` confirmation; clears account data and session tokens)
 - Request history: `/api/v1/bookingRequests/me`, `/api/v1/sellUnitRequests/me`, `/api/v1/unitOrderRequests/me`, `/api/v1/finishRequests/me`, `/api/v1/furnitureBookings/me`, `/api/v1/specialFurnitureRequests/me`
 - Admin review: `PATCH /api/v1/<request-resource>/:id/review`
 - User cancellation: `DELETE /api/v1/<request-resource>/:id` while the request is still `PENDING`
@@ -83,193 +83,193 @@ Production deployment artifacts live here:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/users\` | List all |
-| POST | \`/api/users\` | Create |
-| GET | \`/api/users/:id\` | Get by key |
-| PUT | \`/api/users/:id\` | Full update |
-| PATCH | \`/api/users/:id\` | Partial update |
-| DELETE | \`/api/users/:id\` | Delete |
+| GET | \`/api/v1/users\` | List all |
+| POST | \`/api/v1/users\` | Create |
+| GET | \`/api/v1/users/:id\` | Get by key |
+| PUT | \`/api/v1/users/:id\` | Full update |
+| PATCH | \`/api/v1/users/:id\` | Partial update |
+| DELETE | \`/api/v1/users/:id\` | Delete |
 
 ### OtpToken
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/otpTokens\` | List all |
-| POST | \`/api/otpTokens\` | Create |
-| GET | \`/api/otpTokens/:id\` | Get by key |
-| PUT | \`/api/otpTokens/:id\` | Full update |
-| PATCH | \`/api/otpTokens/:id\` | Partial update |
-| DELETE | \`/api/otpTokens/:id\` | Delete |
+| GET | \`/api/v1/otpTokens\` | List all |
+| POST | \`/api/v1/otpTokens\` | Create |
+| GET | \`/api/v1/otpTokens/:id\` | Get by key |
+| PUT | \`/api/v1/otpTokens/:id\` | Full update |
+| PATCH | \`/api/v1/otpTokens/:id\` | Partial update |
+| DELETE | \`/api/v1/otpTokens/:id\` | Delete |
 
 ### PasswordResetToken
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/passwordResetTokens\` | List all |
-| POST | \`/api/passwordResetTokens\` | Create |
-| GET | \`/api/passwordResetTokens/:id\` | Get by key |
-| PUT | \`/api/passwordResetTokens/:id\` | Full update |
-| PATCH | \`/api/passwordResetTokens/:id\` | Partial update |
-| DELETE | \`/api/passwordResetTokens/:id\` | Delete |
+| GET | \`/api/v1/passwordResetTokens\` | List all |
+| POST | \`/api/v1/passwordResetTokens\` | Create |
+| GET | \`/api/v1/passwordResetTokens/:id\` | Get by key |
+| PUT | \`/api/v1/passwordResetTokens/:id\` | Full update |
+| PATCH | \`/api/v1/passwordResetTokens/:id\` | Partial update |
+| DELETE | \`/api/v1/passwordResetTokens/:id\` | Delete |
 
 ### GalleryItem
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/galleryItems\` | List all |
-| POST | \`/api/galleryItems\` | Create |
-| GET | \`/api/galleryItems/:id\` | Get by key |
-| PUT | \`/api/galleryItems/:id\` | Full update |
-| PATCH | \`/api/galleryItems/:id\` | Partial update |
-| DELETE | \`/api/galleryItems/:id\` | Delete |
+| GET | \`/api/v1/galleryItems\` | List all |
+| POST | \`/api/v1/galleryItems\` | Create |
+| GET | \`/api/v1/galleryItems/:id\` | Get by key |
+| PUT | \`/api/v1/galleryItems/:id\` | Full update |
+| PATCH | \`/api/v1/galleryItems/:id\` | Partial update |
+| DELETE | \`/api/v1/galleryItems/:id\` | Delete |
 
 ### Comment
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/comments\` | List all |
-| POST | \`/api/comments\` | Create |
-| GET | \`/api/comments/:id\` | Get by key |
-| PUT | \`/api/comments/:id\` | Full update |
-| PATCH | \`/api/comments/:id\` | Partial update |
-| DELETE | \`/api/comments/:id\` | Delete |
+| GET | \`/api/v1/comments\` | List all |
+| POST | \`/api/v1/comments\` | Create |
+| GET | \`/api/v1/comments/:id\` | Get by key |
+| PUT | \`/api/v1/comments/:id\` | Full update |
+| PATCH | \`/api/v1/comments/:id\` | Partial update |
+| DELETE | \`/api/v1/comments/:id\` | Delete |
 
 ### Reaction
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/reactions\` | List all |
-| POST | \`/api/reactions\` | Create |
-| GET | \`/api/reactions/:id\` | Get by key |
-| PUT | \`/api/reactions/:id\` | Full update |
-| PATCH | \`/api/reactions/:id\` | Partial update |
-| DELETE | \`/api/reactions/:id\` | Delete |
+| GET | \`/api/v1/reactions\` | List all |
+| POST | \`/api/v1/reactions\` | Create |
+| GET | \`/api/v1/reactions/:id\` | Get by key |
+| PUT | \`/api/v1/reactions/:id\` | Full update |
+| PATCH | \`/api/v1/reactions/:id\` | Partial update |
+| DELETE | \`/api/v1/reactions/:id\` | Delete |
 
 ### Location
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/locations\` | List all |
-| POST | \`/api/locations\` | Create |
-| GET | \`/api/locations/:id\` | Get by key |
-| PUT | \`/api/locations/:id\` | Full update |
-| PATCH | \`/api/locations/:id\` | Partial update |
-| DELETE | \`/api/locations/:id\` | Delete |
+| GET | \`/api/v1/locations\` | List all |
+| POST | \`/api/v1/locations\` | Create |
+| GET | \`/api/v1/locations/:id\` | Get by key |
+| PUT | \`/api/v1/locations/:id\` | Full update |
+| PATCH | \`/api/v1/locations/:id\` | Partial update |
+| DELETE | \`/api/v1/locations/:id\` | Delete |
 
 ### Unit
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/units\` | List all |
-| POST | \`/api/units\` | Create |
-| GET | \`/api/units/:id\` | Get by key |
-| PUT | \`/api/units/:id\` | Full update |
-| PATCH | \`/api/units/:id\` | Partial update |
-| DELETE | \`/api/units/:id\` | Delete |
+| GET | \`/api/v1/units\` | List all |
+| POST | \`/api/v1/units\` | Create |
+| GET | \`/api/v1/units/:id\` | Get by key |
+| PUT | \`/api/v1/units/:id\` | Full update |
+| PATCH | \`/api/v1/units/:id\` | Partial update |
+| DELETE | \`/api/v1/units/:id\` | Delete |
 
 ### BookingRequest
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/bookingRequests\` | List all |
-| POST | \`/api/bookingRequests\` | Create |
-| GET | \`/api/bookingRequests/:id\` | Get by key |
-| PUT | \`/api/bookingRequests/:id\` | Full update |
-| PATCH | \`/api/bookingRequests/:id\` | Partial update |
-| DELETE | \`/api/bookingRequests/:id\` | Delete |
+| GET | \`/api/v1/bookingRequests\` | List all |
+| POST | \`/api/v1/bookingRequests\` | Create |
+| GET | \`/api/v1/bookingRequests/:id\` | Get by key |
+| PUT | \`/api/v1/bookingRequests/:id\` | Full update |
+| PATCH | \`/api/v1/bookingRequests/:id\` | Partial update |
+| DELETE | \`/api/v1/bookingRequests/:id\` | Delete |
 
 ### SellUnitRequest
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/sellUnitRequests\` | List all |
-| POST | \`/api/sellUnitRequests\` | Create |
-| GET | \`/api/sellUnitRequests/:id\` | Get by key |
-| PUT | \`/api/sellUnitRequests/:id\` | Full update |
-| PATCH | \`/api/sellUnitRequests/:id\` | Partial update |
-| DELETE | \`/api/sellUnitRequests/:id\` | Delete |
+| GET | \`/api/v1/sellUnitRequests\` | List all |
+| POST | \`/api/v1/sellUnitRequests\` | Create |
+| GET | \`/api/v1/sellUnitRequests/:id\` | Get by key |
+| PUT | \`/api/v1/sellUnitRequests/:id\` | Full update |
+| PATCH | \`/api/v1/sellUnitRequests/:id\` | Partial update |
+| DELETE | \`/api/v1/sellUnitRequests/:id\` | Delete |
 
 ### UnitOrderRequest
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/unitOrderRequests\` | List all |
-| POST | \`/api/unitOrderRequests\` | Create |
-| GET | \`/api/unitOrderRequests/:id\` | Get by key |
-| PUT | \`/api/unitOrderRequests/:id\` | Full update |
-| PATCH | \`/api/unitOrderRequests/:id\` | Partial update |
-| DELETE | \`/api/unitOrderRequests/:id\` | Delete |
+| GET | \`/api/v1/unitOrderRequests\` | List all |
+| POST | \`/api/v1/unitOrderRequests\` | Create |
+| GET | \`/api/v1/unitOrderRequests/:id\` | Get by key |
+| PUT | \`/api/v1/unitOrderRequests/:id\` | Full update |
+| PATCH | \`/api/v1/unitOrderRequests/:id\` | Partial update |
+| DELETE | \`/api/v1/unitOrderRequests/:id\` | Delete |
 
 ### Finish
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/finishes\` | List all |
-| POST | \`/api/finishes\` | Create |
-| GET | \`/api/finishes/:id\` | Get by key |
-| PUT | \`/api/finishes/:id\` | Full update |
-| PATCH | \`/api/finishes/:id\` | Partial update |
-| DELETE | \`/api/finishes/:id\` | Delete |
+| GET | \`/api/v1/finishes\` | List all |
+| POST | \`/api/v1/finishes\` | Create |
+| GET | \`/api/v1/finishes/:id\` | Get by key |
+| PUT | \`/api/v1/finishes/:id\` | Full update |
+| PATCH | \`/api/v1/finishes/:id\` | Partial update |
+| DELETE | \`/api/v1/finishes/:id\` | Delete |
 
 ### FinishRequest
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/finishRequests\` | List all |
-| POST | \`/api/finishRequests\` | Create |
-| GET | \`/api/finishRequests/:id\` | Get by key |
-| PUT | \`/api/finishRequests/:id\` | Full update |
-| PATCH | \`/api/finishRequests/:id\` | Partial update |
-| DELETE | \`/api/finishRequests/:id\` | Delete |
+| GET | \`/api/v1/finishRequests\` | List all |
+| POST | \`/api/v1/finishRequests\` | Create |
+| GET | \`/api/v1/finishRequests/:id\` | Get by key |
+| PUT | \`/api/v1/finishRequests/:id\` | Full update |
+| PATCH | \`/api/v1/finishRequests/:id\` | Partial update |
+| DELETE | \`/api/v1/finishRequests/:id\` | Delete |
 
 ### FurnitureItem
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/furnitureItems\` | List all |
-| POST | \`/api/furnitureItems\` | Create |
-| GET | \`/api/furnitureItems/:id\` | Get by key |
-| PUT | \`/api/furnitureItems/:id\` | Full update |
-| PATCH | \`/api/furnitureItems/:id\` | Partial update |
-| DELETE | \`/api/furnitureItems/:id\` | Delete |
+| GET | \`/api/v1/furnitureItems\` | List all |
+| POST | \`/api/v1/furnitureItems\` | Create |
+| GET | \`/api/v1/furnitureItems/:id\` | Get by key |
+| PUT | \`/api/v1/furnitureItems/:id\` | Full update |
+| PATCH | \`/api/v1/furnitureItems/:id\` | Partial update |
+| DELETE | \`/api/v1/furnitureItems/:id\` | Delete |
 
 ### FurnitureBooking
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/furnitureBookings\` | List all |
-| POST | \`/api/furnitureBookings\` | Create |
-| GET | \`/api/furnitureBookings/:id\` | Get by key |
-| PUT | \`/api/furnitureBookings/:id\` | Full update |
-| PATCH | \`/api/furnitureBookings/:id\` | Partial update |
-| DELETE | \`/api/furnitureBookings/:id\` | Delete |
+| GET | \`/api/v1/furnitureBookings\` | List all |
+| POST | \`/api/v1/furnitureBookings\` | Create |
+| GET | \`/api/v1/furnitureBookings/:id\` | Get by key |
+| PUT | \`/api/v1/furnitureBookings/:id\` | Full update |
+| PATCH | \`/api/v1/furnitureBookings/:id\` | Partial update |
+| DELETE | \`/api/v1/furnitureBookings/:id\` | Delete |
 
 ### SpecialFurnitureRequest
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/specialFurnitureRequests\` | List all |
-| POST | \`/api/specialFurnitureRequests\` | Create |
-| GET | \`/api/specialFurnitureRequests/:id\` | Get by key |
-| PUT | \`/api/specialFurnitureRequests/:id\` | Full update |
-| PATCH | \`/api/specialFurnitureRequests/:id\` | Partial update |
-| DELETE | \`/api/specialFurnitureRequests/:id\` | Delete |
+| GET | \`/api/v1/specialFurnitureRequests\` | List all |
+| POST | \`/api/v1/specialFurnitureRequests\` | Create |
+| GET | \`/api/v1/specialFurnitureRequests/:id\` | Get by key |
+| PUT | \`/api/v1/specialFurnitureRequests/:id\` | Full update |
+| PATCH | \`/api/v1/specialFurnitureRequests/:id\` | Partial update |
+| DELETE | \`/api/v1/specialFurnitureRequests/:id\` | Delete |
 
 ### Favorite
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | \`/api/favorites\` | List all |
-| POST | \`/api/favorites\` | Create |
-| GET | \`/api/favorites/:id\` | Get by key |
-| PUT | \`/api/favorites/:id\` | Full update |
-| PATCH | \`/api/favorites/:id\` | Partial update |
-| DELETE | \`/api/favorites/:id\` | Delete |
+| GET | \`/api/v1/favorites\` | List all |
+| POST | \`/api/v1/favorites\` | Create |
+| GET | \`/api/v1/favorites/:id\` | Get by key |
+| PUT | \`/api/v1/favorites/:id\` | Full update |
+| PATCH | \`/api/v1/favorites/:id\` | Partial update |
+| DELETE | \`/api/v1/favorites/:id\` | Delete |
 
 ## Query Parameters
 
 \`\`\`
-GET /api/resource?page=1&limit=20&sort=createdAt&order=desc&filter[field]=value&include=relation
+GET /api/v1/resource?page=1&limit=20&sort=createdAt&order=desc&filter[field]=value&include=relation
 \`\`\`
 
 ## Scripts

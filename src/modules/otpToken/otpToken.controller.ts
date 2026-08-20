@@ -94,7 +94,7 @@ export class OtpTokenController {
   }
 
   /**
-   * GET /api/otpTokens
+   * GET /api/v1/otpTokens
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -124,7 +124,7 @@ export class OtpTokenController {
   }
 
   /**
-   * GET /api/otpTokens/:id
+   * GET /api/v1/otpTokens/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -157,7 +157,7 @@ export class OtpTokenController {
   }
 
   /**
-   * POST /api/otpTokens
+   * POST /api/v1/otpTokens
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -170,7 +170,7 @@ export class OtpTokenController {
   }
 
   /**
-   * PUT /api/otpTokens/:id
+   * PUT /api/v1/otpTokens/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -182,7 +182,7 @@ export class OtpTokenController {
   }
 
   /**
-   * PATCH /api/otpTokens/:id
+   * PATCH /api/v1/otpTokens/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -194,7 +194,7 @@ export class OtpTokenController {
   }
 
   /**
-   * DELETE /api/otpTokens/:id
+   * DELETE /api/v1/otpTokens/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

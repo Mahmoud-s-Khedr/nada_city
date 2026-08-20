@@ -97,7 +97,7 @@ export class SpecialFurnitureRequestController {
   }
 
   /**
-   * GET /api/specialFurnitureRequests/cursor
+   * GET /api/v1/specialFurnitureRequests/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -122,7 +122,7 @@ export class SpecialFurnitureRequestController {
   }
 
   /**
-   * GET /api/specialFurnitureRequests
+   * GET /api/v1/specialFurnitureRequests
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -152,7 +152,7 @@ export class SpecialFurnitureRequestController {
   }
 
   /**
-   * GET /api/specialFurnitureRequests/:id
+   * GET /api/v1/specialFurnitureRequests/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -185,7 +185,7 @@ export class SpecialFurnitureRequestController {
   }
 
   /**
-   * POST /api/specialFurnitureRequests
+   * POST /api/v1/specialFurnitureRequests
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -198,7 +198,7 @@ export class SpecialFurnitureRequestController {
   }
 
   /**
-   * PUT /api/specialFurnitureRequests/:id
+   * PUT /api/v1/specialFurnitureRequests/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -210,7 +210,7 @@ export class SpecialFurnitureRequestController {
   }
 
   /**
-   * PATCH /api/specialFurnitureRequests/:id
+   * PATCH /api/v1/specialFurnitureRequests/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -222,7 +222,7 @@ export class SpecialFurnitureRequestController {
   }
 
   /**
-   * DELETE /api/specialFurnitureRequests/:id
+   * DELETE /api/v1/specialFurnitureRequests/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

@@ -99,7 +99,7 @@ export class BookingRequestController {
   }
 
   /**
-   * GET /api/bookingRequests/cursor
+   * GET /api/v1/bookingRequests/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -124,7 +124,7 @@ export class BookingRequestController {
   }
 
   /**
-   * GET /api/bookingRequests
+   * GET /api/v1/bookingRequests
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -154,7 +154,7 @@ export class BookingRequestController {
   }
 
   /**
-   * GET /api/bookingRequests/:id
+   * GET /api/v1/bookingRequests/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -187,7 +187,7 @@ export class BookingRequestController {
   }
 
   /**
-   * POST /api/bookingRequests
+   * POST /api/v1/bookingRequests
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -200,7 +200,7 @@ export class BookingRequestController {
   }
 
   /**
-   * PUT /api/bookingRequests/:id
+   * PUT /api/v1/bookingRequests/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -212,7 +212,7 @@ export class BookingRequestController {
   }
 
   /**
-   * PATCH /api/bookingRequests/:id
+   * PATCH /api/v1/bookingRequests/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -224,7 +224,7 @@ export class BookingRequestController {
   }
 
   /**
-   * DELETE /api/bookingRequests/:id
+   * DELETE /api/v1/bookingRequests/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

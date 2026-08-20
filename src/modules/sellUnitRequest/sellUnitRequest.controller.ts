@@ -103,7 +103,7 @@ export class SellUnitRequestController {
   }
 
   /**
-   * GET /api/sellUnitRequests/cursor
+   * GET /api/v1/sellUnitRequests/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -128,7 +128,7 @@ export class SellUnitRequestController {
   }
 
   /**
-   * GET /api/sellUnitRequests
+   * GET /api/v1/sellUnitRequests
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -158,7 +158,7 @@ export class SellUnitRequestController {
   }
 
   /**
-   * GET /api/sellUnitRequests/:id
+   * GET /api/v1/sellUnitRequests/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -191,7 +191,7 @@ export class SellUnitRequestController {
   }
 
   /**
-   * POST /api/sellUnitRequests
+   * POST /api/v1/sellUnitRequests
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -204,7 +204,7 @@ export class SellUnitRequestController {
   }
 
   /**
-   * PUT /api/sellUnitRequests/:id
+   * PUT /api/v1/sellUnitRequests/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -216,7 +216,7 @@ export class SellUnitRequestController {
   }
 
   /**
-   * PATCH /api/sellUnitRequests/:id
+   * PATCH /api/v1/sellUnitRequests/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -228,7 +228,7 @@ export class SellUnitRequestController {
   }
 
   /**
-   * DELETE /api/sellUnitRequests/:id
+   * DELETE /api/v1/sellUnitRequests/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

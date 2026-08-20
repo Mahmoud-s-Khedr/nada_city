@@ -94,7 +94,7 @@ export class PasswordResetTokenController {
   }
 
   /**
-   * GET /api/passwordResetTokens
+   * GET /api/v1/passwordResetTokens
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -124,7 +124,7 @@ export class PasswordResetTokenController {
   }
 
   /**
-   * GET /api/passwordResetTokens/:id
+   * GET /api/v1/passwordResetTokens/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -157,7 +157,7 @@ export class PasswordResetTokenController {
   }
 
   /**
-   * POST /api/passwordResetTokens
+   * POST /api/v1/passwordResetTokens
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -170,7 +170,7 @@ export class PasswordResetTokenController {
   }
 
   /**
-   * PUT /api/passwordResetTokens/:id
+   * PUT /api/v1/passwordResetTokens/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -182,7 +182,7 @@ export class PasswordResetTokenController {
   }
 
   /**
-   * PATCH /api/passwordResetTokens/:id
+   * PATCH /api/v1/passwordResetTokens/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -194,7 +194,7 @@ export class PasswordResetTokenController {
   }
 
   /**
-   * DELETE /api/passwordResetTokens/:id
+   * DELETE /api/v1/passwordResetTokens/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {

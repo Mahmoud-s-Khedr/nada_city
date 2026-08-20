@@ -97,7 +97,7 @@ export class FurnitureItemController {
   }
 
   /**
-   * GET /api/furnitureItems/cursor
+   * GET /api/v1/furnitureItems/cursor
    * Cursor-based pagination using the id field.
    */
   async listCursor(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
@@ -122,7 +122,7 @@ export class FurnitureItemController {
   }
 
   /**
-   * GET /api/furnitureItems
+   * GET /api/v1/furnitureItems
    */
   async list(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -153,7 +153,7 @@ export class FurnitureItemController {
   }
 
   /**
-   * GET /api/furnitureItems/:id
+   * GET /api/v1/furnitureItems/:id
    */
   async getOne(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -186,7 +186,7 @@ export class FurnitureItemController {
   }
 
   /**
-   * POST /api/furnitureItems
+   * POST /api/v1/furnitureItems
    */
   async create(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -199,7 +199,7 @@ export class FurnitureItemController {
   }
 
   /**
-   * PUT /api/furnitureItems/:id
+   * PUT /api/v1/furnitureItems/:id
    */
   async update(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -211,7 +211,7 @@ export class FurnitureItemController {
   }
 
   /**
-   * PATCH /api/furnitureItems/:id
+   * PATCH /api/v1/furnitureItems/:id
    */
   async patch(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
@@ -223,7 +223,7 @@ export class FurnitureItemController {
   }
 
   /**
-   * DELETE /api/furnitureItems/:id
+   * DELETE /api/v1/furnitureItems/:id
    */
   async remove(req: ControllerRequest, res: ControllerResponse, next: ControllerNext): Promise<void> {
     try {
