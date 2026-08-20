@@ -11,7 +11,7 @@ import { revokeRefreshTokensForUser } from '../auth/refresh-token.service.js';
 import { blacklistAccessToken } from '../auth/access-token-blacklist.service.js';
 
 export const DeleteAccountSchema = z.object({
-  confirmation: z.literal('DELETE'),
+  confirmation: z.literal('DELETE').optional(),
   password: z.string().min(1).optional(),
   currentPassword: z.string().min(1).optional(),
 }).strict().refine((data) => !(data.password && data.currentPassword), {
@@ -24,23 +24,12 @@ const router = Router();
 router.delete(
   '/me/account',
   authenticate,
-  validate(DeleteAccountSchema),
+  validate(DeleteAccountSchema, 'body', false),
   async (req, res, next) => {
     try {
       const userId = getAuthUserId(req);
       const accessToken = req.headers.authorization?.slice('Bearer '.length);
-      const { confirmation, password, currentPassword } = req.body as z.infer<typeof DeleteAccountSchema>;
-
-      // Keep this explicit even though Zod validates it, so the destructive
-      // action remains guarded if the route is ever called without validate().
-      if (confirmation !== 'DELETE') {
-        throw new ProblemDetail({
-          type: 'confirmation-required',
-          title: 'Confirmation Required',
-          status: 422,
-          detail: 'Type DELETE to permanently delete your account.',
-        });
-      }
+      const { password, currentPassword } = (req.body ?? {}) as z.infer<typeof DeleteAccountSchema>;
 
       const user = await prisma.user.findUnique({
         where: { id: userId },

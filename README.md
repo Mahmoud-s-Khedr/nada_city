@@ -10,7 +10,7 @@ This backend now exposes workflow-specific endpoints for the SRS-critical flows 
 
 - Auth: `/api/v1/auth/register`, `/api/v1/auth/verify-otp`, `/api/v1/auth/login`, `/api/v1/auth/forgot-password`, `/api/v1/auth/reset-password`, `/api/v1/auth/refresh`, `/api/v1/auth/logout`
 - Profile: `/api/v1/users/me`, `PATCH /api/v1/users/me`, `/api/v1/users/me/change-password`
-- Account deletion: `DELETE /api/v1/me/account` (requires in-app `DELETE` confirmation; clears account data and session tokens)
+- Account deletion: `DELETE /api/v1/me/account` (requires bearer authentication; request body is optional and clears account data and session tokens)
 - Request history: `/api/v1/bookingRequests/me`, `/api/v1/sellUnitRequests/me`, `/api/v1/unitOrderRequests/me`, `/api/v1/finishRequests/me`, `/api/v1/furnitureBookings/me`, `/api/v1/specialFurnitureRequests/me`
 - Admin review: `PATCH /api/v1/<request-resource>/:id/review`
 - User cancellation: `DELETE /api/v1/<request-resource>/:id` while the request is still `PENDING`

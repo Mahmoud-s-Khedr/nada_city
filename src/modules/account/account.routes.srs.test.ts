@@ -99,7 +99,16 @@ describe('DELETE /api/v1/me/account', () => {
     expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
   });
 
-  it('rejects a missing or incorrect final confirmation', async () => {
+  it('deletes the account without requiring a request body', async () => {
+    const response = await request(app)
+      .delete('/api/v1/me/account')
+      .set('Authorization', `Bearer ${authToken()}`);
+
+    expect(response.status).toBe(204);
+    expect(prismaMock.user.delete).toHaveBeenCalledWith({ where: { id: 'user-1' } });
+  });
+
+  it('rejects an incorrect optional confirmation', async () => {
     const response = await request(app)
       .delete('/api/v1/me/account')
       .set('Authorization', `Bearer ${authToken()}`)

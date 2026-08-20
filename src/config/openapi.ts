@@ -172,7 +172,7 @@ function buildValidationRequest(
     }
 
     request.body = {
-      required: true,
+      required: metadata.required,
       content: {
         'application/json': {
           schema: metadata.schema,

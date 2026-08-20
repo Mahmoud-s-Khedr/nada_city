@@ -35,6 +35,7 @@ describe('OpenAPI generation', () => {
       security: [{ bearerAuth: [] }],
       responses: { 204: { description: 'No Content' } },
     });
+    expect((spec.paths['/api/v1/me/account'] as any)?.delete?.requestBody?.required).toBe(false);
     expect((spec.paths['/api/v1/me/account'] as any)?.delete?.requestBody?.content?.['application/json']?.schema?.properties?.confirmation?.enum)
       .toEqual(['DELETE']);
 

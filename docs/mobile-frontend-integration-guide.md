@@ -74,19 +74,20 @@ The app must expose a visible **Delete Account** action under Account Settings. 
 Recommended flow:
 
 1. Show a warning that deletion is immediate and permanent and that profile data, comments, reactions, favorites, requests, bookings, and account tokens will be removed.
-2. Require a final confirmation in the app. The confirmation request is:
+2. Send the authenticated deletion request. No request body is required:
 
 ```http
 DELETE /api/v1/me/account
 Authorization: Bearer <accessToken>
-Content-Type: application/json
 ```
+
+An optional JSON body may be sent when the app requests password re-authentication:
 
 ```json
-{ "confirmation": "DELETE", "password": "current-password" }
+{ "password": "current-password" }
 ```
 
-`password` is optional when the app does not request re-authentication; the exact `confirmation` value is always required. `currentPassword` is accepted as an alias for clients that already use that field name.
+`confirmation: "DELETE"` remains accepted for backward compatibility, and `currentPassword` is accepted as a password-field alias.
 
 3. On `204 No Content`, clear the locally stored access token and refresh token, reset the authenticated user/session state, and navigate to the signed-out screen. Do not call refresh after deletion.
 4. Keep the user on the confirmation screen and show the API problem detail for `401`, `422`, or other failures; do not clear local credentials when deletion fails.
@@ -153,7 +154,7 @@ Legend:
 
 | Endpoint | Auth | Request Body | Path/Query | Success | Common Errors | Usage |
 |---|---|---|---|---|---|---|
-| `DELETE /me/account` | Bearer user/admin | `confirmation*` must equal `DELETE`; `password?` | - | `204` empty body | `401` missing/invalid bearer token or wrong password, `404` account missing, `422` missing/wrong confirmation | Permanently delete only the account identified by the bearer token. Cascading relations remove the user's comments, reactions, favorites, bookings, and request records; OTP/password-reset rows and refresh tokens are revoked too. |
+| `DELETE /me/account` | Bearer user/admin | Optional: `password?`, `currentPassword?`, or legacy `confirmation: "DELETE"` | - | `204` empty body | `401` missing/invalid bearer token or wrong password, `404` account missing, `422` invalid body | Permanently delete only the account identified by the bearer token. Cascading relations remove the user's comments, reactions, favorites, bookings, and request records; OTP/password-reset rows and refresh tokens are revoked too. |
 
 ---
 
