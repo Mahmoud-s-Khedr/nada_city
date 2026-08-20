@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { ProblemDetail } from './error.middleware.js';
 import { normalizeRole } from '../utils/auth.js';
+import { isAccessTokenBlacklisted } from '../modules/auth/access-token-blacklist.service.js';
 
 // Extend Express Request to include user info
 declare global {
@@ -17,7 +18,7 @@ declare global {
  * JWT Authentication Middleware
  * Verifies Bearer token and attaches decoded user to request.
  */
-export function authenticate(req: Request, _res: Response, next: NextFunction): void {
+export async function authenticate(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -31,10 +32,9 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
 
   const token = authHeader.split(' ')[1];
 
+  let decoded: jwt.JwtPayload;
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as jwt.JwtPayload;
-    req.user = decoded;
-    next();
+    decoded = jwt.verify(token, env.JWT_SECRET) as jwt.JwtPayload;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       return next(new ProblemDetail({
@@ -51,6 +51,27 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
       detail: 'The authentication token is invalid.',
     }));
   }
+
+  try {
+    if (await isAccessTokenBlacklisted(token)) {
+      return next(new ProblemDetail({
+        type: 'token-revoked',
+        title: 'Token Revoked',
+        status: 401,
+        detail: 'The authentication token has been revoked.',
+      }));
+    }
+  } catch {
+    return next(new ProblemDetail({
+      type: 'authentication-service-unavailable',
+      title: 'Authentication Service Unavailable',
+      status: 503,
+      detail: 'Token revocation status could not be verified.',
+    }));
+  }
+
+  req.user = decoded;
+  next();
 }
 
 /**

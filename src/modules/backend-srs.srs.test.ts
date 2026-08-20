@@ -61,6 +61,7 @@ const prismaMock = {
 };
 
 const redisMock = {
+  exists: vi.fn(),
   get: vi.fn(),
   set: vi.fn(),
   del: vi.fn(),
@@ -94,6 +95,7 @@ function resetMocks() {
   }
   prismaMock.$transaction.mockClear();
   redisMock.get.mockReset();
+  redisMock.exists.mockReset();
   redisMock.set.mockReset();
   redisMock.del.mockReset();
 }

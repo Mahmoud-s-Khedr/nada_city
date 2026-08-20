@@ -26,6 +26,7 @@ import { specialFurnitureRequestRoutes } from './modules/specialFurnitureRequest
 import { favoriteRoutes } from './modules/favorite/favorite.routes.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { storageRoutes } from './modules/storage/storage.routes.js';
+import { accountRoutes } from './modules/account/account.routes.js';
 import { getDependencyStatus, isReady } from './config/health.js';
 
 const app = express();
@@ -110,6 +111,9 @@ app.use('/api/v1/furnitureItems', furnitureItemRoutes);
 app.use('/api/v1/furnitureBookings', furnitureBookingRoutes);
 app.use('/api/v1/specialFurnitureRequests', specialFurnitureRequestRoutes);
 app.use('/api/v1/favorites', favoriteRoutes);
+// Account deletion intentionally uses the public path required by App Store
+// review, while the rest of the API remains under /api/v1.
+app.use('/api', accountRoutes);
 
 // -- Swagger Documentation
 setupSwagger(app);

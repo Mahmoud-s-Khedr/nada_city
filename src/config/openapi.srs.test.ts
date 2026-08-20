@@ -31,6 +31,12 @@ describe('OpenAPI generation', () => {
     expect(spec.paths['/live']).toBeDefined();
     expect(spec.paths['/ready']).toBeDefined();
     expect(spec.paths['/health']).toBeDefined();
+    expect(spec.paths['/api/me/account']?.delete).toMatchObject({
+      security: [{ bearerAuth: [] }],
+      responses: { 204: { description: 'No Content' } },
+    });
+    expect((spec.paths['/api/me/account'] as any)?.delete?.requestBody?.content?.['application/json']?.schema?.properties?.confirmation?.enum)
+      .toEqual(['DELETE']);
 
     for (const prefix of mountedPrefixes) {
       expect(paths.some((path) => path.startsWith(prefix))).toBe(true);

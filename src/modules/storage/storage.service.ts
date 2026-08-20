@@ -1,4 +1,9 @@
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  DeleteObjectsCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../../config/env.js';
 import { logger } from '../../config/logger.js';
@@ -50,7 +55,7 @@ export async function generatePresignedUrl(
 ): Promise<PresignedUrlResult> {
   const client = getS3Client();
   const bucket = env.S3_BUCKET;
-  const expiresIn = 24 * 3600; // 24 hour in seconds
+  const expiresIn = Math.min(Math.max(options.expiresIn ?? 300, 1), 3600);
 
   let command;
   if (options.operation === 'put') {
@@ -75,4 +80,31 @@ export async function generatePresignedUrl(
 
   const get_url = buildPublicObjectUrl(env.S3_PUBLIC_BASE_URL, options.key);
   return { url, get_url, key: options.key, expiresIn };
+}
+
+/**
+ * Delete objects that are owned by an account. The caller is responsible for
+ * deriving keys only from records owned by that account.
+ */
+export async function deleteStoredObjects(keys: string[]): Promise<void> {
+  const uniqueKeys = [...new Set(keys.filter((key) => key.length > 0))];
+  if (uniqueKeys.length === 0) {
+    return;
+  }
+
+  const client = getS3Client();
+  for (let index = 0; index < uniqueKeys.length; index += 1000) {
+    const batch = uniqueKeys.slice(index, index + 1000);
+    const result = await client.send(new DeleteObjectsCommand({
+      Bucket: env.S3_BUCKET,
+      Delete: {
+        Objects: batch.map((Key) => ({ Key })),
+        Quiet: true,
+      },
+    }));
+
+    if (result.Errors && result.Errors.length > 0) {
+      logger.warn({ errors: result.Errors }, 'Some account-owned storage objects could not be deleted');
+    }
+  }
 }

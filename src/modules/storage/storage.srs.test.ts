@@ -7,6 +7,11 @@ vi.mock('./storage.service.js', () => ({
   generatePresignedUrl: vi.fn(),
 }));
 
+vi.mock('../auth/access-token-blacklist.service.js', () => ({
+  blacklistAccessToken: vi.fn(),
+  isAccessTokenBlacklisted: vi.fn().mockResolvedValue(false),
+}));
+
 const { app } = await import('../../app.js');
 
 describe('storage routes', () => {

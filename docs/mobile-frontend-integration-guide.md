@@ -2,7 +2,7 @@
 
 This guide is the integration source of truth for web/mobile clients.
 
-- Base URL prefix: `/api/v1`
+- Base URL prefix: `/api/v1` (account deletion is the intentional exception at `/api/me/account`.)
 - Primary source order used: mounted routes (`src/app.ts`) -> route validation schemas/DTOs -> runtime response helpers/middleware -> generated OpenAPI (`nada-city-api.json`)
 - Important: some OpenAPI responses are generic; clients should follow **runtime response envelopes** described below.
 
@@ -67,6 +67,30 @@ Authorization: Bearer <accessToken>
 3. On token expiry, call `POST /api/v1/auth/refresh` with `refreshToken`
 4. End session with `POST /api/v1/auth/logout` with `refreshToken`
 
+### Account deletion (Apple Review)
+
+The app must expose a visible **Delete Account** action under Account Settings. The action must be available to a signed-in user without contacting support or opening a browser.
+
+Recommended flow:
+
+1. Show a warning that deletion is immediate and permanent and that profile data, comments, reactions, favorites, requests, bookings, and account tokens will be removed.
+2. Require a final confirmation in the app. The confirmation request is:
+
+```http
+DELETE /api/me/account
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+```
+
+```json
+{ "confirmation": "DELETE", "password": "current-password" }
+```
+
+`password` is optional when the app does not request re-authentication; the exact `confirmation` value is always required. `currentPassword` is accepted as an alias for clients that already use that field name.
+
+3. On `204 No Content`, clear the locally stored access token and refresh token, reset the authenticated user/session state, and navigate to the signed-out screen. Do not call refresh after deletion.
+4. Keep the user on the confirmation screen and show the API problem detail for `401`, `422`, or other failures; do not clear local credentials when deletion fails.
+
 ### Authorization and ownership
 
 - `Public`: no token required.
@@ -124,6 +148,12 @@ Legend:
 | `GET /me` | Bearer user/admin | - | - | `200 {data:{id,name,email,phone,address,rate,role,isVerified,createdAt,updatedAt}}` | `401`, `404` | Fetch current user profile for app session. |
 | `PATCH /me` | Bearer user/admin | `name?`, `phone?`, `address?` | - | `200 {data:{...user}}` | `401`, `422` | Update profile fields. |
 | `POST /me/change-password` | Bearer user/admin | `oldPassword*`, `newPassword*`, `confirmPassword*` | - | `200 {data:{changed:true}}` | `401` wrong old password, `422` validation | Change password from authenticated session. |
+
+## Account deletion (`/api`) [Client]
+
+| Endpoint | Auth | Request Body | Path/Query | Success | Common Errors | Usage |
+|---|---|---|---|---|---|---|
+| `DELETE /me/account` | Bearer user/admin | `confirmation*` must equal `DELETE`; `password?` | - | `204` empty body | `401` missing/invalid bearer token or wrong password, `404` account missing, `422` missing/wrong confirmation | Permanently delete only the account identified by the bearer token. Cascading relations remove the user's comments, reactions, favorites, bookings, and request records; OTP/password-reset rows and refresh tokens are revoked too. |
 
 ---
 
@@ -340,7 +370,7 @@ The following route modules exist but are **not mounted in `src/app.ts`**; clien
 1. Register -> verify OTP -> login.
 2. Attach `Authorization` header for protected APIs.
 3. On `401` due to token expiry, call `/auth/refresh`, retry original request once.
-4. On logout, clear both tokens locally.
+4. On logout or successful account deletion, clear both tokens locally. Account deletion is complete only after the app reaches the signed-out state.
 
 ### Request-workflow lifecycle (booking/sell/order/finish/furniture/special)
 1. Create request as authenticated user.

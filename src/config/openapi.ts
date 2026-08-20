@@ -26,6 +26,7 @@ import { specialFurnitureRequestRoutes } from '../modules/specialFurnitureReques
 import { unitRoutes } from '../modules/unit/unit.routes.js';
 import { unitOrderRequestRoutes } from '../modules/unitOrderRequest/unitOrderRequest.routes.js';
 import { userRoutes } from '../modules/user/user.routes.js';
+import { accountRoutes } from '../modules/account/account.routes.js';
 
 extendZodWithOpenApi(z);
 
@@ -48,6 +49,7 @@ type MountedRouter = {
 type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
 const mountedRouters: MountedRouter[] = [
+  { basePath: '/api', tag: 'Account', router: accountRoutes as ExpressRouter },
   { basePath: '/api/v1/auth', tag: 'Auth', router: authRoutes as ExpressRouter },
   { basePath: '/api/v1/storage', tag: 'Storage', router: storageRoutes as ExpressRouter },
   { basePath: '/api/v1/users', tag: 'Users', router: userRoutes as ExpressRouter },
